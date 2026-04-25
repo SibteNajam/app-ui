@@ -1,0 +1,402 @@
+/* ═══════════════════════════════════════════════════════
+   TRADE CALENDAR — Premium 3D Card
+   ═══════════════════════════════════════════════════════ */
+
+.tc-card {
+  position: relative;
+  border-radius: 20px;
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  padding: 20px;
+  /* 3D depth illusion */
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 -2px 6px rgba(0,0,0,0.15) inset,
+    0 20px 50px -12px rgba(0,0,0,0.55),
+    0 8px 20px -6px rgba(0,0,0,0.3);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.35s ease;
+}
+
+.tc-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.08) inset,
+    0 -2px 6px rgba(0,0,0,0.15) inset,
+    0 28px 60px -12px rgba(0,0,0,0.6),
+    0 12px 28px -6px rgba(0,0,0,0.35);
+}
+
+/* Subtle top accent */
+.tc-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(52,211,153,0.35) 40%, rgba(245,158,11,0.3) 60%, transparent);
+  pointer-events: none;
+}
+
+[data-theme="light"] .tc-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* ── HEADER ── */
+.tc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tc-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tc-nav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tc-nav-btn:hover {
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+}
+
+[data-theme="light"] .tc-nav-btn {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+.tc-month-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.3px;
+  min-width: 130px;
+  text-align: center;
+}
+
+[data-theme="light"] .tc-month-label { color: #0f172a; }
+
+/* summary pills */
+.tc-summary-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.tc-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+  min-width: 60px;
+}
+
+.tc-pill-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.1;
+}
+
+[data-theme="light"] .tc-pill-val { color: #0f172a; }
+
+.tc-pill-pnl[data-positive="true"] .tc-pill-val { color: #34d399; }
+.tc-pill-pnl[data-positive="false"] .tc-pill-val { color: #f87171; }
+
+.tc-pill-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 2px;
+}
+
+/* ── CALENDAR GRID ── */
+.tc-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.tc-day-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #4a5568;
+  text-align: center;
+  padding: 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tc-cell {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  gap: 2px;
+  padding: 2px;
+}
+
+.tc-empty { cursor: default; }
+
+.tc-cell-num {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+[data-theme="light"] .tc-cell-num { color: #94a3b8; }
+
+/* Has trade */
+.tc-cell.has-trade .tc-cell-num {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+[data-theme="light"] .tc-cell.has-trade .tc-cell-num { color: #334155; }
+
+.tc-cell.has-trade {
+  background: rgba(255,255,255,0.03);
+}
+
+.tc-cell.has-trade.light { background: rgba(52,211,153,0.04); }
+.tc-cell.has-trade.medium { background: rgba(52,211,153,0.08); }
+.tc-cell.has-trade.intense { background: rgba(52,211,153,0.14); }
+
+/* Hover */
+.tc-cell:not(.tc-empty):hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+  transform: scale(1.08);
+}
+
+.tc-cell.has-trade:hover {
+  border-color: rgba(52,211,153,0.25);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+/* Today */
+.tc-cell.today {
+  background: rgba(52,211,153,0.15);
+  border-color: rgba(52,211,153,0.4);
+  box-shadow: 0 0 16px rgba(52,211,153,0.12);
+}
+
+.tc-cell.today .tc-cell-num {
+  color: #34d399;
+  font-weight: 800;
+}
+
+/* Selected */
+.tc-cell.selected {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.5);
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(245,158,11,0.15);
+}
+
+.tc-cell.selected .tc-cell-num {
+  color: #f59e0b;
+  font-weight: 800;
+}
+
+/* Trade dots */
+.tc-cell-dots {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+  align-items: center;
+}
+
+.tc-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 4px currentColor;
+}
+
+/* ── WIN/LOSS BAR ── */
+.tc-winloss-bar {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 24px;
+  margin-top: 14px;
+  gap: 2px;
+}
+
+.tc-wl-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  transition: flex 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+.tc-wl-win {
+  background: rgba(52,211,153,0.15);
+  color: #34d399;
+  border-radius: 6px 0 0 6px;
+}
+
+.tc-wl-loss {
+  background: rgba(248,113,113,0.12);
+  color: #f87171;
+  border-radius: 0 6px 6px 0;
+}
+
+/* ── TRADE DETAIL SLIDE-UP ── */
+.tc-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
+  opacity: 0;
+}
+
+.tc-detail.open {
+  max-height: 200px;
+  opacity: 1;
+}
+
+.tc-detail-inner {
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  animation: tc-detail-in 0.35s ease;
+}
+
+@keyframes tc-detail-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tc-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tc-detail-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  min-width: 50px;
+}
+
+.tc-detail-day {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f59e0b;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.tc-detail-month {
+  font-size: 10px;
+  font-weight: 700;
+  color: #d97706;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.tc-detail-stats {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
+.tc-dstat {
+  display: flex;
+  flex-direction: column;
+}
+
+.tc-dstat-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.1;
+}
+
+[data-theme="light"] .tc-dstat-val { color: #0f172a; }
+
+.tc-green { color: #34d399 !important; }
+.tc-red { color: #f87171 !important; }
+
+.tc-dstat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* pairs chips */
+.tc-pairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tc-pair-chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #94a3b8;
+  letter-spacing: 0.3px;
+  transition: all 0.2s;
+}
+
+.tc-pair-chip:hover {
+  background: rgba(255,255,255,0.07);
+  color: #e2e8f0;
+}

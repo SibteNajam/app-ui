@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import './Portfolio.css';
+import HoldingsTable from './HoldingsTable';
+import PortfolioInsights from './PortfolioInsights';
 
 /* ══ DATA ══════════════════════════════════════ */
 const PERIODS = ['1D','7D','1M','3M','1Y'];
@@ -407,67 +409,13 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* ── LOWER: HOLDINGS + ACTIVITY ── */}
-      <div className="pf-lower">
-
-        {/* Holdings */}
-        <div className="pf-holdings">
-          <div className="pf-sec-head">
-            <span className="pf-sec-head-label">Portfolio Balance</span>
-            <div className="pf-sec-head-line"/>
-          </div>
-          {HOLDINGS.map(h=>(
-            <div className="pf-holding-row" key={h.sym} onMouseMove={handleMouseMove}>
-              <div className="pf-coin-icon" style={{ background:h.bg, color:h.color }}>{h.sym[0]}</div>
-              <div>
-                <div className="pf-coin-name">{h.sym}</div>
-                <div className="pf-coin-sub">{h.name}</div>
-              </div>
-              <div style={{ marginLeft:'auto', textAlign:'right' }}>
-                <div className="pf-coin-val">{h.val}</div>
-                <div className={`pf-coin-change ${h.pos?'pf-pos':'pf-neg'}`}>{h.amt} · {h.change}</div>
-              </div>
-            </div>
-          ))}
+      {/* ── LOWER: HOLDINGS TABLE + TRADE CALENDAR ── */}
+      <div className="pf-lower-v2">
+        <div className="pf-lower-main">
+          <HoldingsTable />
         </div>
-
-        {/* Exchange Activity */}
-        <div className="pf-activity">
-          <div className="pf-sec-head">
-            <span className="pf-sec-head-label">Exchanges</span>
-            <div className="pf-sec-head-line"/>
-          </div>
-
-          {EXCHANGES.map((ex,i)=>(
-            <div className="pf-ex-tile" key={i} onMouseMove={handleMouseMove}>
-              <div className="pf-ex-tile-top">
-                <div className="pf-ex-tile-name">
-                  {/* Binance diamond */}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L7.5 6.5L9.26 8.26L12 5.52L14.74 8.26L16.5 6.5L12 2Z" fill="#F0B90B"/>
-                    <path d="M12 10L9.26 12.74L12 15.48L14.74 12.74L12 10Z" fill="#F0B90B"/>
-                    <path d="M4.5 10L6.26 11.76L4.5 13.52L2.74 11.76L4.5 10Z" fill="#F0B90B"/>
-                    <path d="M19.5 10L21.26 11.76L19.5 13.52L17.74 11.76L19.5 10Z" fill="#F0B90B"/>
-                    <path d="M7.5 17L9.26 18.76L12 16.02L14.74 18.76L16.5 17L12 12.5L7.5 17Z" fill="#F0B90B"/>
-                  </svg>
-                  {ex.name}
-                </div>
-                {ex.active && <span className="pf-ex-tile-badge">ACTIVE</span>}
-              </div>
-              <div className="pf-ex-tile-sub">{ex.type}</div>
-              <div className="pf-ex-tile-btm">
-                <div>
-                  <div className="pf-ex-val">{ex.val}</div>
-                  <div style={{ fontSize:'11px', color:'#4a5568', fontFamily: 'JetBrains Mono, monospace' }}>{ex.btc}</div>
-                </div>
-                <div className="pf-ex-actions">
-                  <button className="pf-ex-action-btn dep">Deposit</button>
-                  <button className="pf-ex-action-btn tfr">Transfer</button>
-                  <button className="pf-pill-btn download" style={{ width:28,height:28,fontSize:'12px',color:'#4a5568' }}><Dots /></button>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="pf-lower-side">
+          <PortfolioInsights />
         </div>
       </div>
 
