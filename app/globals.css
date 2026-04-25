@@ -1,26 +1,236 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700;800&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
+
+/* ══════════════════════════════════════════════════════
+   THEME SYSTEM — CSS Custom Properties
+   Dark = original colors, Light = professional white theme
+   ══════════════════════════════════════════════════════ */
+
+/* ── DARK THEME (default) ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Page-level backgrounds */
+  --bg-body:               #030308;
+  --bg-body-rgb:           3, 3, 8;
+  --foreground:            #E8EAF6;
+
+  /* Component surface layers (darkest → lightest) */
+  --bg-surface-deep:       rgba(4, 6, 12, 0.2);
+  --bg-surface:            rgba(7, 8, 16, 0.5);
+  --bg-surface-raised:     rgba(12, 14, 28, 0.98);
+  --bg-surface-overlay:    rgba(8, 16, 24, 0.97);
+  --bg-surface-card:       rgba(10, 14, 26, 0.4);
+
+  /* Header */
+  --bg-header:             transparent;
+  --bg-header-border:      rgba(255, 255, 255, 0.04);
+
+  /* Sidebar / Telemetry */
+  --bg-sidebar:            rgba(7, 8, 16, 0.5);
+
+  /* Cards & Panels */
+  --bg-card-primary:       linear-gradient(145deg, rgba(12, 14, 28, 0.98) 0%, rgba(8, 10, 20, 1) 100%);
+  --bg-card-popup:         linear-gradient(145deg, rgba(17, 24, 39, 0.97), rgba(10, 14, 26, 0.99), rgba(7, 10, 20, 1));
+  --bg-card-stats:         linear-gradient(145deg, rgba(10, 22, 30, 0.98), rgba(7, 14, 22, 0.99));
+
+  /* Live Price Chart */
+  --bg-chart:              rgba(4, 8, 16, 0.4);
+  --bg-chart-header:       rgba(0, 0, 0, 0.2);
+
+  /* Market Ticker strip */
+  --bg-ticker:             linear-gradient(90deg, rgba(52, 211, 153, 0.015) 0%, transparent 20%, transparent 80%, rgba(52, 211, 153, 0.015) 100%);
+  --bg-ticker-border:      rgba(255, 255, 255, 0.04);
+
+  /* Trade Filters */
+  --bg-filter-btn:         rgba(7, 41, 51, 0.15);
+  --bg-filter-btn-hover:   rgba(7, 41, 51, 0.3);
+  --bg-filter-menu:        rgba(8, 16, 24, 0.97);
+  --bg-filter-option-hover:rgba(7, 41, 51, 0.45);
+  --bg-filter-search:      rgba(7, 41, 51, 0.12);
+
+  /* TradeHistory cards */
+  --bg-th-front:           linear-gradient(145deg, rgba(12, 14, 28, 0.98) 0%, rgba(8, 10, 20, 1) 100%);
+  --bg-th-toast:           rgba(9, 12, 24, 0.96);
+
+  /* Popup overlay */
+  --bg-overlay:            rgba(3, 6, 15, 0.65);
+  --bg-overlay-stats:      rgba(3, 6, 15, 0.7);
+
+  /* OrderFlowNode */
+  --bg-ofn-card:           linear-gradient(145deg, rgba(12, 14, 28, 0.98) 0%, rgba(8, 10, 20, 1) 100%);
+  --bg-ofn-spine:          rgba(4, 6, 12, 0.2);
+  --bg-ofn-stat-box:       rgba(0, 0, 0, 0.2);
+
+  /* Space Background */
+  --bg-space:              radial-gradient(ellipse at 50% 0%, #0c1225 0%, #070810 40%, #030308 100%);
+
+  /* Misc widget surfaces */
+  --bg-widget-subtle:      rgba(255, 255, 255, 0.02);
+  --bg-widget-hover:       rgba(255, 255, 255, 0.03);
+  --bg-widget-border:      rgba(255, 255, 255, 0.04);
+  --bg-widget-track:       rgba(255, 255, 255, 0.06);
+
+  /* Section count / badge backgrounds */
+  --bg-section-count:      rgba(13, 16, 24, 0.4);
+
+  /* Transition for smooth theme switching */
+  --theme-transition:      background 0.5s ease, background-color 0.5s ease, border-color 0.4s ease, color 0.4s ease;
 }
+
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  /* Page-level backgrounds */
+  --bg-body:               #f1f5f9; /* Slate 100 for better contrast against white cards */
+  --bg-body-rgb:           241, 245, 249;
+  --foreground:            #1e293b;
+
+  /* Component surface layers */
+  --bg-surface-deep:       rgba(255, 255, 255, 0.8);
+  --bg-surface:            #ffffff;
+  --bg-surface-raised:     #ffffff;
+  --bg-surface-overlay:    rgba(255, 255, 255, 0.98);
+  --bg-surface-card:       #ffffff;
+
+  /* Header */
+  --bg-header:             rgba(255, 255, 255, 0.85);
+  --bg-header-border:      rgba(0, 0, 0, 0.05);
+
+  /* Sidebar / Telemetry */
+  --bg-sidebar:            rgba(255, 255, 255, 0.85);
+
+  /* Cards & Panels - Pure white to pop from the f1f5f9 background */
+  --bg-card-primary:       linear-gradient(145deg, #ffffff 0%, #ffffff 100%);
+  --bg-card-popup:         linear-gradient(145deg, #ffffff, #fdfdfd);
+  --bg-card-stats:         linear-gradient(145deg, #ffffff, #fdfdfd);
+
+  /* Live Price Chart */
+  --bg-chart:              #ffffff;
+  --bg-chart-header:       #f8fafc;
+
+  /* Market Ticker strip */
+  --bg-ticker:             linear-gradient(90deg, rgba(52, 211, 153, 0.04) 0%, transparent 20%, transparent 80%, rgba(52, 211, 153, 0.04) 100%);
+  --bg-ticker-border:      rgba(0, 0, 0, 0.05);
+
+  /* Trade Filters */
+  --bg-filter-btn:         rgba(240, 245, 255, 0.8);
+  --bg-filter-btn-hover:   rgba(230, 238, 255, 0.9);
+  --bg-filter-menu:        rgba(255, 255, 255, 0.98);
+  --bg-filter-option-hover:rgba(240, 245, 255, 0.9);
+  --bg-filter-search:      rgba(240, 245, 255, 0.7);
+
+  /* TradeHistory cards */
+  --bg-th-front:           #ffffff;
+  --bg-th-toast:           rgba(255, 255, 255, 0.98);
+
+  /* Popup overlay */
+  --bg-overlay:            rgba(148, 163, 184, 0.4);
+  --bg-overlay-stats:      rgba(148, 163, 184, 0.45);
+
+  /* OrderFlowNode */
+  --bg-ofn-card:           #ffffff;
+  --bg-ofn-spine:          #f8fafc;
+  --bg-ofn-stat-box:       #f1f5f9;
+
+  /* Space Background — very subtle light wash */
+  --bg-space:              radial-gradient(ellipse at 50% 0%, #f8fafc 0%, #f1f5f9 40%, #e2e8f0 100%);
+
+  /* Misc widget surfaces */
+  --bg-widget-subtle:      rgba(0, 0, 0, 0.02);
+  --bg-widget-hover:       rgba(0, 0, 0, 0.03);
+  --bg-widget-border:      rgba(0, 0, 0, 0.06);
+  --bg-widget-track:       rgba(0, 0, 0, 0.06);
+
+  /* Section count / badge backgrounds */
+  --bg-section-count:      rgba(240, 243, 255, 0.7);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   GLOBAL STYLES
+   ══════════════════════════════════════════════════════ */
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--bg-body);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter', 'Space Grotesk', sans-serif;
+  --font-mono: 'Space Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Global Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-body);
+  color: var(--foreground);
+  font-family: 'Inter', 'Space Grotesk', 'Montserrat', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: var(--theme-transition);
+}
+
+/* Ensure full height */
+html {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ══════════════════════════════════════════════════════
+   GLOBAL SKELETON LOADING SYSTEM
+   ══════════════════════════════════════════════════════ */
+
+.skeleton-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .skeleton-box {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.skeleton-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+[data-theme="light"] .skeleton-box::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

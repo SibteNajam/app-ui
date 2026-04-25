@@ -1,0 +1,198 @@
+/* ═══════════════════════════════════════════════════════════
+   AMBIENT FIELD — floating motes + center glow
+   ═══════════════════════════════════════════════════════════ */
+
+.amb-field {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 240px;
+  /* clear PanelScouter (240px wide) */
+  right: 270px;
+  /* clear SideTelemetryRight (270px wide) */
+  z-index: 1;
+  /* behind cards z:10+, behind panels z:15 */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.amb-mote {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.65);
+  box-shadow: 0 0 4px rgba(52, 211, 153, 0.25);
+  animation: amb-float linear infinite;
+  will-change: transform;
+}
+
+@keyframes amb-float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+
+  25% {
+    transform: translateY(-18px) translateX(8px) scale(1.2);
+  }
+
+  50% {
+    transform: translateY(-6px) translateX(-6px) scale(0.8);
+  }
+
+  75% {
+    transform: translateY(-22px) translateX(4px) scale(1.1);
+  }
+
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+}
+
+.amb-glow {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 460px;
+  height: 260px;
+  border-radius: 50%;
+  /* background: radial-gradient(ellipse,
+      rgba(6, 182, 212, 0.012) 0%,
+      rgba(122, 90, 248, 0.006) 45%,
+      transparent 70%); */
+  /* add some gradient colros  red blueorange yellow */
+
+  pointer-events: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   MARKET PULSE TICKER — scrollin g strip between sections
+   ═══════════════════════════════════════════════════════════ */
+
+.mpt-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* Clear left scouter panel only — right side extends naturally */
+  width: calc(100% - 240px);
+  margin-left: 240px;
+  padding: 10px 24px;
+  border-top: 1px solid var(--bg-ticker-border);
+  border-bottom: 1px solid var(--bg-ticker-border);
+  background: var(--bg-ticker);
+  transition: var(--theme-transition);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mpt-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mpt-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+  animation: mpt-pulse 2s ease infinite;
+}
+
+@keyframes mpt-pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.mpt-overflow {
+  flex: 1;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg,
+      transparent 0%,
+      black 8%,
+      black 92%,
+      transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg,
+      transparent 0%,
+      black 8%,
+      black 92%,
+      transparent 100%);
+}
+
+.mpt-track {
+  display: flex;
+  gap: 28px;
+  white-space: nowrap;
+  animation: mpt-scroll 40s linear infinite;
+}
+
+@keyframes mpt-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.mpt-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mpt-sym {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: -0.01em;
+}
+
+.mpt-price {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mpt-chg {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.mpt-chg.up {
+  color: #34d399;
+}
+
+.mpt-chg.dn {
+  color: #f87171;
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   ══════════════════════════════════════════════════════ */
+
+[data-theme="light"] .mpt-label { color: #475569; }
+[data-theme="light"] .mpt-sym { color: #1e293b; }
+[data-theme="light"] .mpt-price { color: #64748b; }
+[data-theme="light"] .mpt-divider { background: rgba(0,0,0,0.1); }

@@ -1,0 +1,135 @@
+/* ══════════════════════════════════════════════════════
+   SKELETON LOADER — Shimmer animations
+   ══════════════════════════════════════════════════════ */
+
+@keyframes skel-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.07) 40%,
+    rgba(255, 255, 255, 0.03) 80%
+  );
+  background-size: 400px 100%;
+  animation: skel-shimmer 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* ── Exchange Card Skeleton ── */
+.skel-exchange-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 180px;
+}
+
+.skel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skel-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skel-card-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skel-card-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skel-card-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.skel-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skel-stat-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.2);
+  min-width: 80px;
+}
+
+.skel-card-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+}
+
+/* ── Section Skeleton ── */
+.skel-portfolio-section {
+  width: 100%;
+  padding: 0 24px;
+}
+
+.skel-section-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.skel-section-divider::before,
+.skel-section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.skel-section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.skel-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .skel-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .skel-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

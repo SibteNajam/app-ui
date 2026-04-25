@@ -1,0 +1,245 @@
+/* ══════════════════════════════════════════════════════
+   TRADE FILTERS — Compact dropdown filter bar
+   Theme: #072933
+   ══════════════════════════════════════════════════════ */
+
+.tf-root {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 12px;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+  position: relative;
+  z-index: 20;
+  margin-left: 80px;
+  margin-top: 10px;
+}
+
+/* ── Row 1: dropdowns ── */
+.tf-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* ── Row 2: search ── */
+.tf-bar-search {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* ── Divider ── */
+.tf-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════
+   COMPACT DROPDOWN
+   ══════════════════════════════════════════════════════ */
+
+.tf-dropdown-wrap {
+  position: relative;
+}
+
+.tf-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  height: 28px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-filter-btn);
+  transition: var(--theme-transition);
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tf-dropdown-btn:hover,
+.tf-dropdown-btn.open {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  background: var(--bg-filter-btn-hover);
+}
+
+.tf-dropdown-btn.accent {
+  border-color: rgba(14, 240, 173, 0.1);
+}
+
+.tf-dropdown-btn.accent:hover,
+.tf-dropdown-btn.accent.open {
+  border-color: rgba(14, 240, 173, 0.22);
+  color: #0ef0ad;
+}
+
+.tf-dd-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.55;
+}
+
+.tf-dd-value {
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ── Chevron ── */
+.tf-chevron {
+  transition: transform 0.18s ease;
+  opacity: 0.5;
+}
+
+.tf-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown Menu ── */
+.tf-dd-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  min-width: 120px;
+  background: var(--bg-filter-menu);
+  transition: var(--theme-transition);
+  border: 1px solid rgba(14, 240, 173, 0.08);
+  border-radius: 12px;
+  padding: 4px;
+  z-index: 200;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+  animation: tfDropIn 0.18s ease;
+}
+
+@keyframes tfDropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tf-dd-option {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tf-dd-option:hover {
+  background: var(--bg-filter-option-hover);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.tf-dd-option.active {
+  color: rgba(255, 255, 255, 0.9);
+  background: var(--bg-filter-btn-hover);
+}
+
+.tf-dd-option.active.accent {
+  color: #0ef0ad;
+  background: var(--bg-filter-btn-hover);
+}
+
+/* ══════════════════════════════════════════════════════
+   SEARCH BOX
+   ══════════════════════════════════════════════════════ */
+
+.tf-search {
+  display: flex;
+  align-items: center;
+  background: var(--bg-filter-search);
+  transition: var(--theme-transition);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0 10px;
+  height: 28px;
+  width: 200px;
+  transition: all 0.2s ease;
+}
+
+.tf-search:focus-within {
+  border-color: rgba(14, 240, 173, 0.18);
+  background: rgba(7, 41, 51, 0.2);
+  box-shadow: 0 0 10px rgba(7, 41, 51, 0.22);
+}
+
+.tf-search-icon {
+  color: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.tf-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  padding: 0 7px;
+  width: 100%;
+}
+
+.tf-search input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   ══════════════════════════════════════════════════════ */
+
+[data-theme="light"] .tf-divider { background: rgba(0,0,0,0.08); }
+
+/* Dropdowns */
+[data-theme="light"] .tf-dropdown-btn { 
+  color: #475569; 
+  border-color: rgba(0,0,0,0.1); 
+}
+[data-theme="light"] .tf-dropdown-btn:hover, 
+[data-theme="light"] .tf-dropdown-btn.open { 
+  color: #1e293b; 
+  border-color: rgba(0,0,0,0.2); 
+}
+[data-theme="light"] .tf-dd-menu { 
+  border-color: rgba(0,0,0,0.1); 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+}
+[data-theme="light"] .tf-dd-option { color: #475569; }
+[data-theme="light"] .tf-dd-option:hover { color: #1e293b; }
+[data-theme="light"] .tf-dd-option.active { color: #1e293b; font-weight: 600; }
+
+/* Search Box */
+[data-theme="light"] .tf-search { border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .tf-search-icon { color: #64748b; }
+[data-theme="light"] .tf-search input { color: #1e293b; }
+[data-theme="light"] .tf-search input::placeholder { color: #94a3b8; }

@@ -1,0 +1,138 @@
+.pe-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 260px; /* Perfectly matches the flip cards */
+  border-radius: 25px;
+  background: linear-gradient(145deg, rgba(12, 14, 28, 0.8) 0%, rgba(8, 10, 20, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  transition: width 0.8s cubic-bezier(0.19, 1, 0.22, 1), border-radius 0.8s, background 0.8s, border-color 0.8s;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  z-index: 100;
+}
+
+.pe-wrapper:hover, .pe-wrapper.syncing, .pe-wrapper.optimal {
+  width: 250px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(12, 14, 28, 0.98) 0%, rgba(8, 10, 20, 1) 100%);
+  border-color: rgba(0, 255, 136, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 255, 136, 0.03);
+}
+
+/* Base Spine (always visible) */
+.pe-spine {
+  width: 50px;
+  min-width: 50px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  z-index: 10;
+}
+
+.pe-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(0, 255, 136, 0.4);
+  animation: pe-breath 3s ease-in-out infinite;
+}
+
+@keyframes pe-breath {
+  0%, 100% { transform: scale(1); opacity: 0.5; box-shadow: 0 0 0px transparent; }
+  50% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 10px rgba(0, 255, 136, 0.6); }
+}
+
+.pe-s-txt {
+  font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.4em; writing-mode: vertical-rl; transform: rotate(180deg);
+}
+
+.pe-wave-dots {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.pe-w-dot {
+  width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.15);
+  animation: pe-w-jump 1.5s infinite alternate ease-in-out;
+}
+@keyframes pe-w-jump { 0% { transform: translateX(-4px); opacity: 0.2;} 100% { transform: translateX(4px); opacity: 0.8; background: rgba(0,255,136,0.5);} }
+
+/* Expanded Panel Layout */
+.pe-panel {
+  width: 200px; min-width: 200px; height: 100%; position: relative;
+  display: flex; flex-direction: column; padding: 20px;
+  opacity: 0; transition: opacity 0.5s;
+}
+.pe-wrapper:hover .pe-panel, .pe-wrapper.syncing .pe-panel, .pe-wrapper.optimal .pe-panel {
+  opacity: 1; transition-delay: 0.2s;
+}
+
+.pe-grid-bg {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 10px 10px; pointer-events: none;
+}
+
+.pe-header {
+  display: flex; justify-content: space-between; align-items: center; z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px; margin-bottom: 16px;
+}
+.pe-h-title { font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; }
+
+.pe-h-badge { font-family: 'Space Mono', monospace; font-size: 7px; font-weight: 700; padding: 3px 6px; border-radius: 4px; letter-spacing: 0.1em; transition: background 0.4s, color 0.4s; }
+.pe-h-badge.syncing { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.6); }
+.pe-h-badge.optimal { background: rgba(0, 255, 136, 0.15); color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.2); }
+
+/* Core Abstract Animation */
+.pe-content { flex: 1; position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+
+.pe-core-stage { width: 80px; height: 80px; position: relative; display: flex; align-items: center; justify-content: center; margin-top: 10px; }
+
+.pe-core-ring { position: absolute; border-radius: 50%; border: 1px solid transparent; transition: border-color 0.5s; }
+.pe-core-ring.r1 { width: 80px; height: 80px; border-top-color: rgba(255,255,255,0.1); border-bottom-color: rgba(255,255,255,0.1); animation: pe-spin 8s linear infinite; }
+.pe-core-ring.r2 { width: 64px; height: 64px; border-left-color: rgba(0,255,136,0.2); border-right-color: rgba(0,255,136,0.2); animation: pe-spin-rev 4s linear infinite; }
+.pe-core-ring.r3 { width: 48px; height: 48px; border: 1px dashed rgba(255,255,255,0.15); animation: pe-spin 12s linear infinite; }
+
+.pe-core-ring.optimal.r1 { border-color: rgba(0, 255, 136, 0.15); animation-duration: 4s; }
+.pe-core-ring.optimal.r2 { border-color: rgba(0, 255, 136, 0.4); animation-duration: 2s; }
+.pe-core-ring.optimal.r3 { border-color: rgba(0, 255, 136, 0.2); animation-duration: 6s; }
+
+.pe-core-orb {
+  width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.5);
+  transition: all 0.5s;
+}
+.pe-core-orb.optimal {
+  background: rgba(0, 255, 136, 0.1); border-color: #00ff88; color: #00E5FF;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(0, 255, 136, 0.2);
+  text-shadow: 0 0 8px #00E5FF;
+}
+
+@keyframes pe-spin { to { transform: rotate(360deg); } }
+@keyframes pe-spin-rev { to { transform: rotate(-360deg); } }
+
+.pe-status-text {
+  font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.4);
+  letter-spacing: 0.1em; margin: 16px 0 10px; text-align: center;
+}
+
+.pe-metrics {
+  width: 100%; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateY(10px); transition: opacity 0.5s, transform 0.5s;
+}
+.pe-metrics.optimal { opacity: 1; transform: translateY(0); }
+
+.pe-m-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,0,0,0.2); padding: 5px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.02);
+}
+.pe-m-lbl { font-family: 'Space Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.3); }
+.pe-m-val { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; color: #E8EAF6; }

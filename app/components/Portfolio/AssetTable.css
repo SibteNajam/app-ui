@@ -1,0 +1,276 @@
+/* ══════════════════════════════════════════════════════
+   ASSET TABLE — Portfolio holdings table
+   ══════════════════════════════════════════════════════ */
+
+.at-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.01);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+
+.at-wrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.at-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.at-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+}
+
+.at-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+/* ── Header ── */
+.at-th {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+  position: sticky;
+  top: 0;
+  background: rgba(3, 3, 8, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
+.at-th:hover {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.at-th-right {
+  text-align: right;
+}
+
+.at-th-asset {
+  padding-left: 20px;
+}
+
+.at-sort-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 3px;
+}
+
+.at-sort-icon.idle {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.at-sort-icon.active {
+  color: #34d399;
+}
+
+/* ── Row ── */
+.at-row {
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.at-row:hover {
+  background: rgba(52, 211, 153, 0.02);
+}
+
+.at-row:not(:last-child) .at-td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.at-td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+.at-td-right {
+  text-align: right;
+}
+
+.at-td-asset {
+  padding-left: 20px;
+}
+
+/* ── Asset cell ── */
+.at-asset-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.at-coin-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.at-coin-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.at-coin-letter {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.at-coin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.at-coin-sym {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.at-coin-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Values ── */
+.at-val-main {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+.at-val-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.2);
+  margin-left: 4px;
+}
+
+.at-val-dimmed {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+.at-val-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.at-pnl-badge {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.at-pnl-badge.pos {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.at-pnl-badge.neg {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.08);
+}
+
+/* ── Allocation bar ── */
+.at-alloc-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.at-alloc-bar-bg {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.at-alloc-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #34d399cc);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.at-alloc-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ── Change ── */
+.at-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.at-change.pos {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.at-change.neg {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.06);
+}
+
+/* ── Exchange badge ── */
+.at-exchange-badge {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}

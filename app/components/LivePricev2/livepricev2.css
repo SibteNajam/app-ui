@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+.btc-root {
+  background: #111;
+  border-radius: 16px;
+  padding: 20px 0 0 0;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  color: #e0e0e0;
+  min-width: 340px;
+  max-width: 980px;
+  margin: 0 auto;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ---- HEADER ---- */
+.btc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 12px 24px;
+}
+
+.btc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btc-icon svg rect {
+  rx: 6px;
+}
+
+.btc-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f0f0f0;
+  letter-spacing: -0.3px;
+}
+
+.btc-subtitle {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.btc-live-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #bbb;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+}
+
+.btc-live-chip:hover {
+  border-color: #F7931A;
+  color: #F7931A;
+}
+
+.btc-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  animation: btc-pulse 1.4s ease-in-out infinite;
+}
+
+/* ---- PRICE ROW ---- */
+.btc-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 24px 16px 24px;
+  flex-wrap: wrap;
+}
+
+.btc-price-open {
+  font-size: 28px;
+  font-weight: 700;
+  color: #888;
+}
+
+.btc-price-divider {
+  font-size: 22px;
+  color: #333;
+}
+
+.btc-price-current {
+  font-size: 28px;
+  font-weight: 700;
+  color: #f0f0f0;
+  transition: color 0.3s;
+}
+
+.btc-price-delta {
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 4px;
+  transition: color 0.3s;
+}
+
+.btc-price-delta.up {
+  color: #4ade80;
+}
+
+.btc-price-delta.down {
+  color: #f87171;
+}
+
+/* ---- CHART ---- */
+.btc-chart-container {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  background: #0d0d0d;
+  overflow: hidden;
+}
+
+.btc-svg {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- Y-AXIS ---- */
+.btc-y-axis {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  pointer-events: none;
+}
+
+.btc-y-label {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #555;
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+
+.btc-target-label {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  font-size: 10px;
+  background: #555;
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* ---- X-AXIS ---- */
+.btc-x-axis {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 24px;
+  pointer-events: none;
+}
+
+.btc-x-label {
+  position: absolute;
+  bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 9.5px;
+  color: #444;
+  white-space: nowrap;
+}
+
+/* ---- STATES ---- */
+.btc-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  font-size: 13px;
+  z-index: 10;
+}
+
+.btc-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 13px;
+  gap: 10px;
+  z-index: 10;
+}
+
+.btc-loading-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #F7931A;
+  animation: btc-pulse 1s ease-in-out infinite;
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes btc-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}

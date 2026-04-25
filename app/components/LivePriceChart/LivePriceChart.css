@@ -1,0 +1,157 @@
+.lpc-wrapper {
+  background: var(--bg-chart);
+  transition: var(--theme-transition);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 260px;
+  /* Exactly equals the 260px of the .th-card */
+  margin-top: auto;
+  margin-bottom: 50px;
+  /* Offset the 20px section padding + 8px track padding */
+  color: #fff;
+  font-family: "Space Mono", "Inter", sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.lpc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-chart-header);
+  transition: var(--theme-transition);
+  gap: 12px;
+}
+
+.lpc-icon-wrap {
+  width: 32px;
+  height: 32px;
+  background: #f7931a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.lpc-icon-wrap img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+.lpc-title-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.lpc-asset-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lpc-timestamp {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lpc-hero-price {
+  font-family: 'Space Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #00E5FF;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Canvas stretching properly */
+.lpc-canvas-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  min-height: 0;
+}
+
+.lpc-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lpc-chart-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lpc-btn {
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lpc-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lpc-btn.active {
+  background: rgba(0, 229, 255, 0.1);
+  color: #00E5FF;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.lpc-btn.more-btn {
+  background: transparent;
+  padding: 8px 12px;
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   ══════════════════════════════════════════════════════ */
+
+[data-theme="light"] .lpc-wrapper {
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .lpc-header {
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+[data-theme="light"] .lpc-pair { color: #1e293b; }
+[data-theme="light"] .lpc-price { color: #1e293b; }
+
+[data-theme="light"] .lpc-btn {
+  background: rgba(0,0,0,0.04);
+  color: #64748b;
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .lpc-btn:hover {
+  background: rgba(0,0,0,0.08);
+  color: #1e293b;
+}
+[data-theme="light"] .lpc-btn.active {
+  background: rgba(6,182,212,0.1);
+  color: #0891b2;
+  border-color: rgba(6,182,212,0.3);
+}
