@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 .ht-wrapper {
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(12px);
   overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   height: 100%;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .ht-table-header {
@@ -26,6 +26,7 @@
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.3px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .ht-table-actions {
@@ -94,31 +95,48 @@
 
 .ht-main-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
+.ht-main-table thead {
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .ht-main-table th {
-  color: #94a3b8;
+  color: #64748b;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
+}
+
+.ht-main-table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.ht-main-table th:last-child {
+  border-top-right-radius: 12px;
 }
 
 .ht-tr {
   transition: background 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .ht-tr:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.ht-tr:last-child {
+.ht-tr:hover .ht-hover-target {
+  color: #60a5fa !important;
+  transition: color 0.2s ease;
+}
+
+.ht-tr:last-child td {
   border-bottom: none;
 }
 
@@ -126,10 +144,15 @@
   padding: 16px 24px;
   vertical-align: middle;
   white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .right-align {
   text-align: right;
+}
+
+.center-align {
+  text-align: center;
 }
 
 .ht-coin-cell {
@@ -165,14 +188,14 @@
 
 .ht-coin-sym {
   color: #f8fafc;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
 }
 
 .ht-coin-name {
   color: #64748b;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .ht-td-price {
@@ -184,7 +207,7 @@
 
 .ht-td-qty {
   color: #e2e8f0;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
@@ -196,18 +219,24 @@
   font-variant-numeric: tabular-nums;
 }
 
-.ht-td-free {
-  color: #f8fafc;
-  font-weight: 500;
+.ht-action-btn {
+  background: rgb(161, 54, 54);
+  color: rgb(255, 255, 255);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 600;
   font-size: 13px;
-  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 
-.ht-td-locked {
-  color: #94a3b8;
-  font-weight: 500;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
+.ht-action-btn:hover {
+  background: rgba(189, 21, 21, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 .ht-empty {

@@ -9,11 +9,11 @@
 }
 
 .csa-card {
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 20px;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
 .csa-list-card {
@@ -40,17 +40,48 @@
 }
 
 .csa-list::-webkit-scrollbar {
-  width: 4px;
+  display: none;
 }
-.csa-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+
+.csa-list {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.csa-checkbox {
+  width: 16px;
+  height: 16px;
   border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.csa-checkbox.checked {
+  background: rgb(59, 130, 246);
+  border-color: rgb(59, 130, 246);
 }
 
 .csa-list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background 0.2s, transform 0.2s;
+  padding: 8px;
+  border-radius: 12px;
+  margin: -8px;
+}
+
+.csa-list-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.csa-list-item:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .csa-item-left {
@@ -197,20 +228,46 @@
 }
 
 .csa-convert-btn {
-  background: rgba(255, 255, 255, 0.05);
+  opacity: 0.8;
+  background: rgba(34, 87, 146, 0.4);
   color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 12px;
   padding: 12px;
   font-size: 14px;
   font-weight: 600;
   width: 100%;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.csa-convert-btn span {
+  transition: letter-spacing 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0px;
+  margin-right: 0px;
+}
+
+.csa-convert-btn .csa-btn-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .csa-convert-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+  background: rgb(37, 106, 218);
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.csa-convert-btn:hover span {
+  letter-spacing: 1.5px;
+  margin-right: -1.5px;
+}
+
+.csa-convert-btn:hover .csa-btn-icon {
+  transform: translateX(4px);
 }

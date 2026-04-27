@@ -1,25 +1,32 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { LayoutDashboard, Briefcase, Activity, Bell, Wifi, ChevronDown, Sun, Moon } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '../../context/ThemeContext';
 import './DashboardHeader.css';
 
 const NAV_ITEMS = [
-  { name: 'Dashboard', icon: <LayoutDashboard size={15} />, hash: '' },
-  { name: 'Portfolio', icon: <Briefcase size={15} />, hash: '#/portfolio' },
-  { name: 'Analytics', icon: <Activity size={15} />, hash: '#/analytics' },
-  { name: 'Alerts',    icon: <Bell size={15} />, hash: '#/alerts' },
+  { name: 'Dashboard', icon: <LayoutDashboard size={15} />, path: '/dashboard' },
+  { name: 'Portfolio', icon: <Briefcase size={15} />, path: '/portfolio' },
+  { name: 'Analytics', icon: <Activity size={15} />, path: '/analytics' },
+  { name: 'Alerts',    icon: <Bell size={15} />, path: '/alerts' },
 ];
 
-function getActiveFromHash() {
-  if (typeof window === 'undefined') return 'Dashboard';
-  const hash = window.location.hash;
-  const match = NAV_ITEMS.find(i => i.hash === hash);
-  return match ? match.name : 'Dashboard';
-}
-
 export default function DashboardHeader() {
-  const [activeTab, setActiveTab] = useState(getActiveFromHash);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const getActiveFromPath = useCallback(() => {
+    if (!pathname) return 'Dashboard';
+    const match = NAV_ITEMS.find(i => pathname.startsWith(i.path));
+    return match ? match.name : 'Dashboard';
+  }, [pathname]);
+
+  const [activeTab, setActiveTab] = useState(getActiveFromPath());
+
+  useEffect(() => {
+    setActiveTab(getActiveFromPath());
+  }, [getActiveFromPath]);
   const [time, setTime] = useState('');
   const [ping, setPing] = useState(12);
   const { theme, toggleTheme } = useTheme();
@@ -115,7 +122,7 @@ export default function DashboardHeader() {
               className={`dh-tab ${activeTab === item.name ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab(item.name);
-                window.location.hash = item.hash;
+                router.push(item.path);
               }}
             >
               {item.icon}

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { ArrowRight, Check } from 'lucide-react';
 import './ConvertSmallAssets.css';
 
 const SMALL_ASSETS = [
@@ -14,6 +15,16 @@ const getLogoUrl = (id: string) => `https://cryptologos.cc/logos/${id}-logo.png`
 
 export default function ConvertSmallAssets() {
   const [imgError, setImgError] = useState<Record<string, boolean>>({});
+  const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set(SMALL_ASSETS.map(a => a.sym)));
+
+  const toggleSelection = (sym: string) => {
+    setSelectedAssets(prev => {
+      const next = new Set(prev);
+      if (next.has(sym)) next.delete(sym);
+      else next.add(sym);
+      return next;
+    });
+  };
 
   return (
     <div className="csa-container">
@@ -22,8 +33,11 @@ export default function ConvertSmallAssets() {
         <div className="csa-card-header">SMALL ASSETS</div>
         <div className="csa-list">
           {SMALL_ASSETS.map(a => (
-            <div key={a.sym} className="csa-list-item">
+            <div key={a.sym} className="csa-list-item" onClick={() => toggleSelection(a.sym)} style={{ cursor: 'pointer' }}>
               <div className="csa-item-left">
+                <div className={`csa-checkbox ${selectedAssets.has(a.sym) ? 'checked' : ''}`}>
+                  {selectedAssets.has(a.sym) && <Check size={12} strokeWidth={4} />}
+                </div>
                 <div className="csa-icon-wrap" style={{ background: `${a.color}22` }}>
                   {!imgError[a.sym] ? (
                     <img 
@@ -87,7 +101,10 @@ export default function ConvertSmallAssets() {
           <div className="csa-convert-text">
             Convert your crypto dusts to BNB
           </div>
-          <button className="csa-convert-btn">Convert BNB</button>
+          <button className="csa-convert-btn">
+            <span>Convert BNB</span>
+            <ArrowRight size={16} className="csa-btn-icon" />
+          </button>
         </div>
       </div>
     </div>

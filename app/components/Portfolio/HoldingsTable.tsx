@@ -36,12 +36,13 @@ export default function HoldingsTable({ walletFilter, searchQuery }: { walletFil
         <table className="ht-main-table">
           <thead>
             <tr>
-              <th>Asset</th>
+              <th className="left-align">Asset</th>
               <th className="right-align">Price</th>
               <th className="right-align">Quantity</th>
-              <th className="right-align">Value (USDT)</th>
               <th className="right-align">Free</th>
               <th className="right-align">Locked</th>
+              <th className="right-align">Value (USDT)</th>
+              <th className="center-align">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -62,25 +63,28 @@ export default function HoldingsTable({ walletFilter, searchQuery }: { walletFil
                       )}
                     </div>
                     <div className="ht-coin-info">
-                      <span className="ht-coin-sym">{a.sym}</span>
-                      <span className="ht-coin-name">{a.name}</span>
+                      <span className="ht-coin-sym ht-hover-target">{a.sym}</span>
+                      <span className="ht-coin-name ht-hover-target">{a.name}</span>
                     </div>
                   </div>
                 </td>
-                <td className="right-align ht-td-price">
+                <td className="right-align ht-td-price ht-hover-target">
                   ${a.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                 </td>
                 <td className="right-align ht-td-qty">
                   {a.qty.toLocaleString()}
                 </td>
-                <td className="right-align ht-td-val">
+                <td className="right-align ht-td-qty">
+                  {(a.qty * 0.9).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                </td>
+                <td className="right-align ht-td-qty" style={{ color: '#64748b' }}>
+                  {(a.qty * 0.1).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                </td>
+                <td className="right-align ht-td-val ht-hover-target">
                   ${a.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
-                <td className="right-align ht-td-free">
-                  {a.free.toLocaleString()}
-                </td>
-                <td className="right-align ht-td-locked">
-                  {a.locked.toLocaleString()}
+                <td className="center-align">
+                  <button className="ht-action-btn">Sell</button>
                 </td>
               </tr>
             ))}

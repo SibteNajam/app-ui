@@ -1,0 +1,609 @@
+/* ══════════════════════════════════════════════════════
+   ANALYTICS PAGE — Premium dark trading analytics
+   ══════════════════════════════════════════════════════ */
+
+.an-page {
+  padding: 20px 32px 48px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── TOP BAR ── */
+.an-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  background: rgba(8, 10, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+}
+
+.an-exchange-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.an-exchange-icon {
+  flex-shrink: 0;
+}
+
+.an-exchange-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.an-exchange-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.01em;
+}
+
+.an-exchange-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.02em;
+}
+
+/* Time filter pills */
+.an-filters {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.an-filter-btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.03em;
+}
+
+.an-filter-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.an-filter-btn.active {
+  background: linear-gradient(135deg, rgba(240, 185, 11, 0.2), rgba(240, 185, 11, 0.08));
+  color: #f0b90b;
+  box-shadow: 0 0 12px rgba(240, 185, 11, 0.1);
+}
+
+/* Connected badge */
+.an-connected-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  background: rgba(52, 211, 153, 0.06);
+  color: #34d399;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.an-connected-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+  animation: an-pulse 2s ease-in-out infinite;
+}
+
+@keyframes an-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(52, 211, 153, 0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 12px rgba(52, 211, 153, 0.3); }
+}
+
+/* ── CHARTS GRID ── */
+.an-charts-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .an-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── CHART CARD ── */
+.an-chart-card {
+  background: rgba(8, 10, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.an-chart-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 60px rgba(52, 211, 153, 0.02);
+}
+
+/* ── CHART HEADER ── */
+.an-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  gap: 16px;
+}
+
+.an-chart-title-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.an-chart-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.an-chart-icon-wrap.growth {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.an-chart-icon-wrap.activity {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+.an-chart-title {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.08em;
+  margin: 0 0 4px;
+}
+
+.an-chart-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.an-chart-subtitle strong {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.an-chart-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.an-chart-sub-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.25);
+  white-space: nowrap;
+}
+
+/* PnL Badge */
+.an-pnl-badge {
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.an-pnl-badge.positive {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.an-pnl-badge.negative {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Legend pills (for activity chart) */
+.an-chart-legend-pills {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.an-legend-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.an-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* ── CHART BODY ── */
+.an-chart-body {
+  padding: 4px 8px 0 0;
+}
+
+/* Style Recharts internals */
+.an-chart-body .recharts-cartesian-grid-horizontal line {
+  stroke: rgba(255, 255, 255, 0.04);
+}
+
+.an-chart-body .recharts-legend-wrapper {
+  padding-top: 0 !important;
+}
+
+.an-chart-body .recharts-brush {
+  margin-top: 8px;
+}
+
+.an-chart-body .recharts-brush-slide {
+  fill: rgba(240, 185, 11, 0.08);
+  stroke: rgba(240, 185, 11, 0.25);
+}
+
+.an-chart-body .recharts-brush-traveller rect {
+  fill: rgba(240, 185, 11, 0.6);
+  rx: 3;
+  stroke: none;
+}
+
+.an-chart-body .recharts-brush-texts text {
+  fill: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+}
+
+/* ── CHART FOOTER ── */
+.an-chart-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.an-chart-footer-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.an-chart-footer-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.an-chart-footer-stat svg {
+  opacity: 0.5;
+}
+
+.an-chart-footer-stat.highlight {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.an-chart-footer-stat.highlight strong {
+  color: #34d399;
+  font-weight: 700;
+}
+
+/* ── TOOLTIP ── */
+.an-tooltip {
+  background: rgba(10, 12, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  min-width: 180px;
+}
+
+.an-tooltip-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.an-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.an-tooltip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.an-tooltip-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  flex: 1;
+}
+
+.an-tooltip-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.an-tooltip-val.positive {
+  color: #34d399;
+}
+
+.an-tooltip-val.negative {
+  color: #ef4444;
+}
+
+.an-tooltip-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT THEME OVERRIDES — Complete coverage
+   ══════════════════════════════════════════════════════ */
+
+/* Top bar */
+[data-theme="light"] .an-top-bar {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .an-exchange-name {
+  color: #0f172a;
+}
+
+[data-theme="light"] .an-exchange-sub {
+  color: #94a3b8;
+}
+
+/* Filters */
+[data-theme="light"] .an-filters {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .an-filter-btn {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .an-filter-btn:hover {
+  color: #334155;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .an-filter-btn.active {
+  background: linear-gradient(135deg, rgba(240, 185, 11, 0.18), rgba(240, 185, 11, 0.06));
+  color: #92400e;
+  box-shadow: 0 0 8px rgba(240, 185, 11, 0.08);
+}
+
+/* Connected badge */
+[data-theme="light"] .an-connected-badge {
+  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.06);
+  color: #059669;
+}
+
+[data-theme="light"] .an-connected-dot {
+  background: #059669;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+/* Chart cards */
+[data-theme="light"] .an-chart-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  backdrop-filter: none;
+}
+
+[data-theme="light"] .an-chart-card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Icon wraps */
+[data-theme="light"] .an-chart-icon-wrap.growth {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.12);
+}
+
+[data-theme="light"] .an-chart-icon-wrap.activity {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.12);
+}
+
+/* Chart titles & text */
+[data-theme="light"] .an-chart-title {
+  color: #0f172a;
+}
+
+[data-theme="light"] .an-chart-subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .an-chart-subtitle strong {
+  color: #334155;
+}
+
+[data-theme="light"] .an-chart-sub-label {
+  color: #94a3b8;
+}
+
+/* PnL badge */
+[data-theme="light"] .an-pnl-badge.positive {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+[data-theme="light"] .an-pnl-badge.negative {
+  background: rgba(239, 68, 68, 0.06);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Chart footer */
+[data-theme="light"] .an-chart-footer {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .an-chart-footer-label {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .an-chart-footer-stat {
+  color: #64748b;
+}
+
+[data-theme="light"] .an-chart-footer-stat svg {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .an-chart-footer-stat.highlight {
+  color: #334155;
+}
+
+[data-theme="light"] .an-chart-footer-stat.highlight strong {
+  color: #059669;
+}
+
+/* Legend pills */
+[data-theme="light"] .an-legend-pill {
+  color: #475569;
+}
+
+/* Recharts brush overrides */
+[data-theme="light"] .an-chart-body .recharts-brush-slide {
+  fill: rgba(240, 185, 11, 0.06);
+  stroke: rgba(240, 185, 11, 0.2);
+}
+
+[data-theme="light"] .an-chart-body .recharts-brush-traveller rect {
+  fill: rgba(240, 185, 11, 0.5);
+}
+
+[data-theme="light"] .an-chart-body .recharts-brush-texts text {
+  fill: rgba(30, 41, 59, 0.4);
+}
+
+[data-theme="light"] .an-chart-body .recharts-cartesian-grid-horizontal line {
+  stroke: rgba(0, 0, 0, 0.05);
+}
+
+/* Tooltip */
+[data-theme="light"] .an-tooltip {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .an-tooltip-label {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .an-tooltip-name {
+  color: #64748b;
+}
+
+[data-theme="light"] .an-tooltip-val {
+  color: #0f172a;
+}
+
+[data-theme="light"] .an-tooltip-val.positive {
+  color: #059669;
+}
+
+[data-theme="light"] .an-tooltip-val.negative {
+  color: #dc2626;
+}
+
+[data-theme="light"] .an-tooltip-divider {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .an-page {
+    padding: 16px;
+  }
+
+  .an-top-bar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .an-chart-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .an-chart-header-right {
+    align-items: flex-start;
+  }
+}

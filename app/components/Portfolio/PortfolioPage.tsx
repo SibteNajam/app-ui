@@ -12,8 +12,8 @@ const ALLOCATION = [
   { sym:'BTC', pct:46.8, color:'#f59e0b', val:'$5,350' },
   { sym:'ETH', pct:16.5, color:'#627eea', val:'$1,892' },
   { sym:'SOL', pct:17.6, color:'#9945ff', val:'$2,012' },
-  { sym:'BNB', pct:16.6, color:'#f0b90b', val:'$1,900' },
-  { sym:'ARB', pct:2.5,  color:'#28b9ef', val:'$280'   },
+  { sym:'BNB', pct:15.6, color:'#f0b90b', val:'$1,900' },
+  { sym:'AVAX', pct:3.5,  color:'#ef4444', val:'$380'   },
 ];
 
 const HOLDINGS = [
@@ -247,6 +247,8 @@ function DualLineChart() {
   const usdPath = "M 0 100 C 30 100, 50 60, 90 60 S 140 110, 180 110 S 230 40, 270 40 S 320 80, 360 80 S 410 20, 450 20 S 480 30, 500 30";
   // Smooth Bezier path for BTC (Orange)
   const btcPath = "M 0 60 C 40 60, 60 90, 100 90 S 150 40, 190 40 S 240 70, 280 70 S 330 30, 370 30 S 420 50, 460 50 S 480 40, 500 40";
+  // Smooth Bezier path for AVAX (Red)
+  const avaxPath = "M 0 40 C 40 80, 70 50, 120 70 S 170 120, 210 100 S 260 50, 300 60 S 350 90, 390 70 S 430 100, 470 80 S 490 60, 500 60";
 
   return (
     <div className="pf-chart-svg-wrap">
@@ -257,10 +259,12 @@ function DualLineChart() {
         {/* Smooth paths */}
         <path fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" d={usdPath} className="pf-line-draw"/>
         <path fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" d={btcPath} className="pf-line-draw" opacity="0.8"/>
+        <path fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" d={avaxPath} className="pf-line-draw" opacity="0.8"/>
         
         {/* Ending dots */}
         <circle cx="500" cy="30" r="4" fill="#34d399" />
         <circle cx="500" cy="40" r="3" fill="#f59e0b" />
+        <circle cx="500" cy="60" r="3" fill="#ef4444" />
       </svg>
       {/* X-axis labels */}
       <div className="pf-chart-xaxis">
@@ -365,6 +369,7 @@ export default function PortfolioPage() {
               <div className="pf-chart-legend">
                 <span><span className="pf-legend-dot" style={{ background: '#34d399' }}/> USD</span>
                 <span><span className="pf-legend-dot" style={{ background: '#f59e0b' }}/> BTC</span>
+                <span><span className="pf-legend-dot" style={{ background: '#ef4444' }}/> AVAX</span>
               </div>
             </div>
             <div className="pf-period-tabs">
