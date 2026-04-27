@@ -1,175 +1,96 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import './HoldingsTable.css';
 
-/* ═══ DATA ═══ */
-const WALLET_TYPES = ['All', 'Spot', 'Funding'] as const;
-type WalletType = typeof WALLET_TYPES[number];
+const getLogoUrl = (id: string) => `https://cryptologos.cc/logos/${id}-logo.png`;
 
 const ASSETS = [
-  { sym:'USDT', name:'Tether',      wallet:'Spot' as const,    color:'#26a17b', qty:64.389, available:64.389, price:1,     value:64.31,   pctOfPortfolio:100.0 },
-  { sym:'ETHW', name:'EthereumPoW', wallet:'Funding' as const, color:'#627eea', qty:0.4297, available:0.4297, price:null as number|null,  value:0,       pctOfPortfolio:0.01  },
-  { sym:'ATOM', name:'Cosmos',      wallet:'Spot' as const,    color:'#6f7390', qty:0.00514,available:0.00514,price:2.023, value:0.0104,  pctOfPortfolio:0.0   },
+  { sym:'USDT', name:'Tether', color:'#26a17b', qty: 64.389, price: 1.00, value: 64.389, free: 64.389, locked: 0, id: 'tether-usdt', wallet: 'Spot' },
+  { sym:'BTC', name:'Bitcoin', color:'#f59e0b', qty: 0.0938, price: 57034.20, value: 5349.81, free: 0.0938, locked: 0, id: 'bitcoin-btc', wallet: 'Spot' },
+  { sym:'ETH', name:'Ethereum', color:'#627eea', qty: 0.5939, price: 3185.70, value: 1892.10, free: 0.5939, locked: 0, id: 'ethereum-eth', wallet: 'Funding' },
+  { sym:'SOL', name:'Solana', color:'#9945ff', qty: 12.40, price: 162.29, value: 2012.40, free: 10.0, locked: 2.40, id: 'solana-sol', wallet: 'Spot' },
+  { sym:'BNB', name:'BNB', color:'#f0b90b', qty: 3.20, price: 593.75, value: 1900.00, free: 3.20, locked: 0, id: 'bnb-bnb', wallet: 'Spot' },
+  { sym:'ARB', name:'Arbitrum', color:'#28b9ef', qty: 250.0, price: 1.12, value: 280.00, free: 200.0, locked: 50.0, id: 'arbitrum-arb', wallet: 'Funding' },
 ];
 
-const DUST_ASSETS = [
-  { sym:'ATOM', color:'#6f7390', freeBalance:0.00514, estValue:0.0104 },
-];
+export default function HoldingsTable({ walletFilter, searchQuery }: { walletFilter: string, searchQuery: string }) {
+  const [imgError, setImgError] = useState<Record<string, boolean>>({});
 
-const ConvertIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-);
-
-/* ═══ MAIN COMPONENT ═══ */
-export default function HoldingsTable() {
-  const [walletFilter, setWalletFilter] = useState<WalletType>('All');
-  const [showConvert, setShowConvert] = useState(false);
-  const [selectedDust, setSelectedDust] = useState<Set<string>>(new Set());
-  const [animated, setAnimated] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-
-  useEffect(() => { const t = setTimeout(() => setAnimated(true), 200); return () => clearTimeout(t); }, []);
-
-  const filtered = useMemo(() => {
-    return walletFilter === 'All' ? ASSETS : ASSETS.filter(a => a.wallet === walletFilter);
-  }, [walletFilter]);
-
-  const toggleDust = (sym: string) => {
-    setSelectedDust(prev => { const n = new Set(prev); n.has(sym) ? n.delete(sym) : n.add(sym); return n; });
-  };
-
-  const totalPortfolio = ASSETS.reduce((s, a) => s + a.value, 0);
+  const filtered = ASSETS.filter(a => {
+    const matchesSearch = a.sym.toLowerCase().includes(searchQuery.toLowerCase()) || a.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesWallet = walletFilter === 'All' || a.wallet === walletFilter;
+    return matchesSearch && matchesWallet;
+  });
 
   return (
-    <div className="ht-shell">
-      {/* ── HEADER ── */}
-      <div className="ht-header">
-        <div className="ht-wallet-tabs">
-          {WALLET_TYPES.map(w => (
-            <button key={w} className={`ht-tab ${walletFilter === w ? 'active' : ''}`} onClick={() => setWalletFilter(w)}>{w}</button>
-          ))}
-        </div>
-        <div className="ht-header-right">
-          <div className="ht-total-chip">
-            <span className="ht-total-amount">${totalPortfolio.toFixed(2)}</span>
-          </div>
-          <button className={`ht-convert-btn ${showConvert ? 'active' : ''}`} onClick={() => setShowConvert(v => !v)}>
-            <ConvertIcon /><span>Convert</span>
-          </button>
+    <div className="ht-wrapper">
+      <div className="ht-table-header">
+        <h2 className="ht-table-title">Holdings Overview</h2>
+        <div className="ht-table-actions">
+          <button className="ht-icon-btn"><SlidersHorizontal size={14} /></button>
         </div>
       </div>
 
-      {/* ── ASSET TILES ── */}
-      <div className="ht-tiles">
-        {filtered.map((a, i) => (
-          <div
-            key={a.sym}
-            className={`ht-tile ${animated ? 'in' : ''} ${hoveredCard === a.sym ? 'hovered' : ''}`}
-            style={{ 
-              animationDelay: `${i * 0.12}s`,
-              '--coin-color': a.color,
-              '--coin-color-15': `${a.color}26`,
-              '--coin-color-08': `${a.color}14`,
-              '--coin-color-40': `${a.color}66`,
-            } as React.CSSProperties}
-            onMouseEnter={() => setHoveredCard(a.sym)}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
-            {/* ── AMBIENT GLOW — color bleeds from edges ── */}
-            <div className="ht-tile-glow"/>
-
-            {/* ── GLASS REFLECTION — top highlight ── */}
-            <div className="ht-tile-reflection"/>
-
-            {/* ── INNER LIGHT EDGE — bottom ── */}
-            <div className="ht-tile-edge"/>
-
-            {/* ══ CARD CONTENT ══ */}
-            <div className="ht-tile-body">
-
-              {/* Row 1: Identity + Value */}
-              <div className="ht-tile-row1">
-                {/* Coin Identity Block */}
-                <div className="ht-coin-block">
-                  <div className="ht-coin-orb" style={{ background: `radial-gradient(circle at 35% 35%, ${a.color}55, ${a.color}11)` }}>
-                    <span className="ht-coin-letter">{a.sym[0]}</span>
-                    {/* Animated ring around orb */}
-                    <svg className="ht-coin-ring" viewBox="0 0 52 52">
-                      <circle cx="26" cy="26" r="24" fill="none" stroke={a.color} strokeWidth="1" opacity="0.2" strokeDasharray="3 5" className="ht-ring-spin"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="ht-coin-sym">{a.sym}</div>
-                    <div className="ht-coin-name">{a.name}</div>
-                  </div>
-                </div>
-
-                {/* Value Block — prominent */}
-                <div className="ht-val-block">
-                  <div className="ht-val-main">${a.value < 1 ? a.value.toFixed(4) : a.value.toFixed(2)}</div>
-                  <div className="ht-val-badge" style={{ background: `${a.color}18`, color: a.color, borderColor: `${a.color}30` }}>
-                    {a.wallet}
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 2: Data Cells — frosted glass panels */}
-              <div className="ht-tile-cells">
-                <div className="ht-cell">
-                  <div className="ht-cell-label">Quantity</div>
-                  <div className="ht-cell-val">{a.qty.toFixed(8).replace(/\.?0+$/, '') || '0'}</div>
-                </div>
-                <div className="ht-cell">
-                  <div className="ht-cell-label">Available</div>
-                  <div className="ht-cell-val">{a.available.toFixed(8).replace(/\.?0+$/, '') || '0'}</div>
-                </div>
-                <div className="ht-cell">
-                  <div className="ht-cell-label">Price</div>
-                  <div className="ht-cell-val">{a.price !== null ? `$${a.price}` : '—'}</div>
-                </div>
-                <div className="ht-cell ht-cell-pct">
-                  <div className="ht-cell-label">Portfolio</div>
-                  <div className="ht-pct-display">
-                    {/* Animated fill bar */}
-                    <div className="ht-pct-track">
-                      <div className="ht-pct-fill" style={{ 
-                        width: animated ? `${Math.min(a.pctOfPortfolio, 100)}%` : '0%',
-                        background: `linear-gradient(90deg, ${a.color}88, ${a.color})`,
-                        boxShadow: `0 0 12px ${a.color}44`,
-                      }}/>
+      <div className="ht-table-container">
+        <table className="ht-main-table">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th className="right-align">Price</th>
+              <th className="right-align">Quantity</th>
+              <th className="right-align">Value (USDT)</th>
+              <th className="right-align">Free</th>
+              <th className="right-align">Locked</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(a => (
+              <tr key={a.sym} className="ht-tr">
+                <td>
+                  <div className="ht-coin-cell">
+                    <div className="ht-coin-logo" style={{ background: `${a.color}15`, color: a.color }}>
+                      {!imgError[a.sym] ? (
+                        <img 
+                          src={getLogoUrl(a.id)} 
+                          alt={a.sym} 
+                          onError={() => setImgError(prev => ({...prev, [a.sym]: true}))}
+                          className="ht-real-logo"
+                        />
+                      ) : (
+                        a.sym[0]
+                      )}
                     </div>
-                    <span className="ht-pct-num" style={{ color: a.pctOfPortfolio >= 50 ? a.color : '#64748b' }}>
-                      {a.pctOfPortfolio < 0.01 && a.pctOfPortfolio > 0 ? '<0.01%' : `${a.pctOfPortfolio.toFixed(1)}%`}
-                    </span>
+                    <div className="ht-coin-info">
+                      <span className="ht-coin-sym">{a.sym}</span>
+                      <span className="ht-coin-name">{a.name}</span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── CONVERT DUST DRAWER ── */}
-      <div className={`ht-drawer ${showConvert ? 'open' : ''}`}>
-        <div className="ht-drawer-inner">
-          <div className="ht-drawer-head">
-            <ConvertIcon />
-            <span>Convert Dust to USDT</span>
-            <span className="ht-drawer-tag">Binance</span>
-          </div>
-          {DUST_ASSETS.map(d => (
-            <div key={d.sym} className="ht-dust-item">
-              <input type="checkbox" className="ht-dust-check" checked={selectedDust.has(d.sym)} onChange={() => toggleDust(d.sym)}/>
-              <div className="ht-dust-orb" style={{ background: `${d.color}22`, color: d.color }}>{d.sym[0]}</div>
-              <span className="ht-dust-name">{d.sym}</span>
-              <div className="ht-dust-data">
-                <span>{d.freeBalance}</span>
-                <span className="ht-dust-est">${d.estValue.toFixed(4)}</span>
-              </div>
-              <button className="ht-dust-convert" disabled={!selectedDust.has(d.sym)}>Convert</button>
-            </div>
-          ))}
-        </div>
+                </td>
+                <td className="right-align ht-td-price">
+                  ${a.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                </td>
+                <td className="right-align ht-td-qty">
+                  {a.qty.toLocaleString()}
+                </td>
+                <td className="right-align ht-td-val">
+                  ${a.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="right-align ht-td-free">
+                  {a.free.toLocaleString()}
+                </td>
+                <td className="right-align ht-td-locked">
+                  {a.locked.toLocaleString()}
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={6} className="ht-empty">No assets found matching "{searchQuery}" in {walletFilter}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

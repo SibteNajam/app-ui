@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import './Portfolio.css';
 import HoldingsTable from './HoldingsTable';
-import PortfolioInsights from './PortfolioInsights';
+import ConvertSmallAssets from './ConvertSmallAssets';
 
 /* ══ DATA ══════════════════════════════════════ */
 const PERIODS = ['1D','7D','1M','3M','1Y'];
@@ -274,6 +274,7 @@ function DualLineChart() {
 export default function PortfolioPage() {
   const [period, setPeriod] = useState('7D');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -401,21 +402,29 @@ export default function PortfolioPage() {
 
       {/* ── FILTER BAR ── */}
       <div className="pf-filter-bar">
-        <div className="pf-search"><Search /><span>Search assets…</span></div>
         <div className="pf-filter-pills">
-          {['All','Spot','Futures','Margin'].map(f=>(
+          {['All','Spot','Funding'].map(f=>(
             <button key={f} className={`pf-fpill${activeFilter===f?' active':''}`} onClick={()=>setActiveFilter(f)}>{f}</button>
           ))}
         </div>
+        <div className="pf-search">
+          <Search />
+          <input 
+            type="text" 
+            placeholder="Search assets..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* ── LOWER: HOLDINGS TABLE + TRADE CALENDAR ── */}
+      {/* ── LOWER: HOLDINGS TABLE + SMALL ASSETS ── */}
       <div className="pf-lower-v2">
         <div className="pf-lower-main">
-          <HoldingsTable />
+          <HoldingsTable walletFilter={activeFilter} searchQuery={searchQuery} />
         </div>
         <div className="pf-lower-side">
-          <PortfolioInsights />
+          <ConvertSmallAssets />
         </div>
       </div>
 

@@ -783,10 +783,18 @@
   border-color: #e2e8f0;
 }
 
-.pf-search span {
+.pf-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-family: inherit;
   font-size: 13px;
+  width: 100%;
+}
+
+.pf-search input::placeholder {
   color: #64748b;
-  font-weight: 500;
 }
 
 .pf-filter-pills {
@@ -816,23 +824,10 @@
 }
 
 .pf-fpill.active {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-.pf-fpill.active::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  padding: 1px;
-  background: linear-gradient(90deg, #ff2a2a, #2aff2a, #2a2aff);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 [data-theme="light"] .pf-fpill {
