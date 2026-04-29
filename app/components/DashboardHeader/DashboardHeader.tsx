@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { LayoutDashboard, Briefcase, Activity, Bell, Wifi, ChevronDown, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Activity, Bell, Wifi, ChevronDown, Sun, Moon, Zap } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '../../context/ThemeContext';
 import './DashboardHeader.css';
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { name: 'Dashboard', icon: <LayoutDashboard size={15} />, path: '/dashboard' },
   { name: 'Portfolio', icon: <Briefcase size={15} />, path: '/portfolio' },
   { name: 'Analytics', icon: <Activity size={15} />, path: '/analytics' },
+  { name: 'Insights',  icon: <Zap size={15} />, path: '/insights' },
   { name: 'Alerts',    icon: <Bell size={15} />, path: '/alerts' },
 ];
 
