@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "./context/ThemeContext";
-import SwKiller from "./components/SwKiller/SwKiller";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +16,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ThemeProvider>
-          <SwKiller />
           {children}
         </ThemeProvider>
       </body>

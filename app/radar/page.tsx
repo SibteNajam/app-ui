@@ -3,11 +3,11 @@
 import { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { SIGNALS } from './data/signals'
-import RadarCard2D from './components/RadarCard2D'
+import RadarCard2D from '../components/3d/RadarCard2D'
 import './radar.css'
 
 // Dynamic import for RadarScene — it uses Three.js which can't SSR
-const RadarScene = dynamic(() => import('./components/RadarScene'), {
+const RadarScene = dynamic(() => import('../components/3d/RadarScene'), {
   ssr: false,
   loading: () => (
     <div style={{

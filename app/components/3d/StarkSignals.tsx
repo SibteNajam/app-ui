@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Html, Text } from '@react-three/drei'
 import * as THREE from 'three'
-import { SIGNALS } from '../data/signals'
+import { SIGNALS } from '../../radar/data/signals'
 
 const MAX_VISIBLE = 6
 const SIGNAL_LIFETIME = 90000
@@ -73,11 +73,11 @@ function HoloCard3D({ data, colorPair, onClose, controlsRef }) {
 
   const borderGeo = useMemo(() => {
     const pts = [
-      new THREE.Vector3(-W/2, -H/2, 0),
-      new THREE.Vector3(W/2, -H/2, 0),
-      new THREE.Vector3(W/2, H/2, 0),
-      new THREE.Vector3(-W/2, H/2, 0),
-      new THREE.Vector3(-W/2, -H/2, 0),
+      new THREE.Vector3(-W / 2, -H / 2, 0),
+      new THREE.Vector3(W / 2, -H / 2, 0),
+      new THREE.Vector3(W / 2, H / 2, 0),
+      new THREE.Vector3(-W / 2, H / 2, 0),
+      new THREE.Vector3(-W / 2, -H / 2, 0),
     ]
     return new THREE.BufferGeometry().setFromPoints(pts)
   }, [])
@@ -85,17 +85,17 @@ function HoloCard3D({ data, colorPair, onClose, controlsRef }) {
   const corners = useMemo(() => {
     const size = 0.15
     return [
-      [[-W/2, H/2, 0.001], [-W/2 + size, H/2, 0.001], [-W/2, H/2, 0.001], [-W/2, H/2 - size, 0.001]],
-      [[W/2, H/2, 0.001], [W/2 - size, H/2, 0.001], [W/2, H/2, 0.001], [W/2, H/2 - size, 0.001]],
-      [[-W/2, -H/2, 0.001], [-W/2 + size, -H/2, 0.001], [-W/2, -H/2, 0.001], [-W/2, -H/2 + size, 0.001]],
-      [[W/2, -H/2, 0.001], [W/2 - size, -H/2, 0.001], [W/2, -H/2, 0.001], [W/2, -H/2 + size, 0.001]],
+      [[-W / 2, H / 2, 0.001], [-W / 2 + size, H / 2, 0.001], [-W / 2, H / 2, 0.001], [-W / 2, H / 2 - size, 0.001]],
+      [[W / 2, H / 2, 0.001], [W / 2 - size, H / 2, 0.001], [W / 2, H / 2, 0.001], [W / 2, H / 2 - size, 0.001]],
+      [[-W / 2, -H / 2, 0.001], [-W / 2 + size, -H / 2, 0.001], [-W / 2, -H / 2, 0.001], [-W / 2, -H / 2 + size, 0.001]],
+      [[W / 2, -H / 2, 0.001], [W / 2 - size, -H / 2, 0.001], [W / 2, -H / 2, 0.001], [W / 2, -H / 2 + size, 0.001]],
     ]
   }, [])
 
   const scanLineGeo = useMemo(() => {
     return new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-W/2 + 0.05, 0, 0.002),
-      new THREE.Vector3(W/2 - 0.05, 0, 0.002),
+      new THREE.Vector3(-W / 2 + 0.05, 0, 0.002),
+      new THREE.Vector3(W / 2 - 0.05, 0, 0.002),
     ])
   }, [])
 
@@ -224,7 +224,7 @@ function HoloCard3D({ data, colorPair, onClose, controlsRef }) {
     // Scan line
     if (scanRef.current) {
       const sweep = ((t * 0.4) % 1)
-      scanRef.current.position.y = H/2 - sweep * H
+      scanRef.current.position.y = H / 2 - sweep * H
       scanRef.current.material.opacity = (0.15 + 0.1 * Math.sin(t * 8)) * contentOpacity.current
     }
 
@@ -311,7 +311,7 @@ function HoloCard3D({ data, colorPair, onClose, controlsRef }) {
 
           {/* ═══ DRAG HANDLE BAR (top) — grab here to MOVE ═══ */}
           <mesh
-            position={[0, H/2 - 0.015, 0.003]}
+            position={[0, H / 2 - 0.015, 0.003]}
             onPointerDown={(e) => {
               e.stopPropagation()
               handleDragStart(e)
@@ -322,110 +322,110 @@ function HoloCard3D({ data, colorPair, onClose, controlsRef }) {
             <planeGeometry args={[W, 0.06]} />
             <meshBasicMaterial color={accent} transparent opacity={0.5} side={THREE.FrontSide} />
           </mesh>
-          <Text position={[0, H/2 - 0.015, 0.005]} fontSize={0.03} color="#ffffff" fillOpacity={0.4} anchorX="center" anchorY="middle" letterSpacing={0.4}>
+          <Text position={[0, H / 2 - 0.015, 0.005]} fontSize={0.03} color="#ffffff" fillOpacity={0.4} anchorX="center" anchorY="middle" letterSpacing={0.4}>
             ⋯ DRAG TO MOVE ⋯
           </Text>
 
           {/* Accent bar */}
-          <mesh position={[-(W/2 - 0.4), H/2 - 0.06, 0.001]}>
+          <mesh position={[-(W / 2 - 0.4), H / 2 - 0.06, 0.001]}>
             <planeGeometry args={[0.8, 0.025]} />
             <meshBasicMaterial color={accent} transparent opacity={0.6} side={THREE.FrontSide} />
           </mesh>
 
           {/* ═══ TEXT CONTENT ═══ */}
-          <Text position={[-W/2 + 0.15, H/2 - 0.25, 0.005]} fontSize={0.22} color={accent} anchorX="left" anchorY="top" fontWeight={700} letterSpacing={0.08}>
+          <Text position={[-W / 2 + 0.15, H / 2 - 0.25, 0.005]} fontSize={0.22} color={accent} anchorX="left" anchorY="top" fontWeight={700} letterSpacing={0.08}>
             {data.sym}
           </Text>
 
           {/* Close X */}
-          <mesh position={[W/2 - 0.15, H/2 - 0.18, 0.005]} onClick={(e) => { e.stopPropagation(); onClose() }} onPointerOver={() => { document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = 'default' }}>
+          <mesh position={[W / 2 - 0.15, H / 2 - 0.18, 0.005]} onClick={(e) => { e.stopPropagation(); onClose() }} onPointerOver={() => { document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = 'default' }}>
             <planeGeometry args={[0.2, 0.2]} />
             <meshBasicMaterial color="#041020" transparent opacity={0.5} side={THREE.FrontSide} />
           </mesh>
-          <Text position={[W/2 - 0.15, H/2 - 0.18, 0.006]} fontSize={0.12} color="#ffffff" anchorX="center" anchorY="middle">✕</Text>
+          <Text position={[W / 2 - 0.15, H / 2 - 0.18, 0.006]} fontSize={0.12} color="#ffffff" anchorX="center" anchorY="middle">✕</Text>
 
           {/* Type badge */}
-          <mesh position={[-W/2 + 0.42, H/2 - 0.55, 0.003]}>
+          <mesh position={[-W / 2 + 0.42, H / 2 - 0.55, 0.003]}>
             <planeGeometry args={[0.72, 0.16]} />
             <meshBasicMaterial color={typeColor} transparent opacity={0.08} side={THREE.FrontSide} />
           </mesh>
-          <Text position={[-W/2 + 0.42, H/2 - 0.55, 0.005]} fontSize={0.07} color={typeColor} anchorX="center" anchorY="middle" letterSpacing={0.12}>
+          <Text position={[-W / 2 + 0.42, H / 2 - 0.55, 0.005]} fontSize={0.07} color={typeColor} anchorX="center" anchorY="middle" letterSpacing={0.12}>
             {data.type} SIGNAL
           </Text>
 
           {/* Divider */}
-          <mesh position={[0, H/2 - 0.7, 0.002]}>
+          <mesh position={[0, H / 2 - 0.7, 0.002]}>
             <planeGeometry args={[W - 0.3, 0.005]} />
             <meshBasicMaterial color={accent} transparent opacity={0.08} side={THREE.FrontSide} />
           </mesh>
 
           {/* Price */}
-          <Text position={[-W/2 + 0.15, H/2 - 0.92, 0.005]} fontSize={0.2} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>
+          <Text position={[-W / 2 + 0.15, H / 2 - 0.92, 0.005]} fontSize={0.2} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>
             {priceText}
           </Text>
 
           {/* Change */}
-          <Text position={[-W/2 + 0.15 + priceText.length * 0.11 + 0.15, H/2 - 0.94, 0.005]} fontSize={0.1} color={typeColor} anchorX="left" anchorY="top" fontWeight={600}>
+          <Text position={[-W / 2 + 0.15 + priceText.length * 0.11 + 0.15, H / 2 - 0.94, 0.005]} fontSize={0.1} color={typeColor} anchorX="left" anchorY="top" fontWeight={600}>
             {data.change || '—'}
           </Text>
 
           {/* Stats background */}
-          <mesh position={[0, H/2 - 1.32, 0.002]}>
+          <mesh position={[0, H / 2 - 1.32, 0.002]}>
             <planeGeometry args={[W - 0.3, 0.42]} />
             <meshBasicMaterial color="#0a1830" transparent opacity={0.5} side={THREE.FrontSide} />
           </mesh>
 
           {/* Confidence */}
-          <Text position={[-W/2 + 0.25, H/2 - 1.15, 0.005]} fontSize={0.055} color="#ffffff" fillOpacity={0.33} anchorX="left" anchorY="top" letterSpacing={0.12}>CONF</Text>
-          <Text position={[-W/2 + 0.25, H/2 - 1.28, 0.005]} fontSize={0.11} color={confColor} anchorX="left" anchorY="top" fontWeight={700}>{confText}</Text>
-          <mesh position={[-W/2 + 0.5, H/2 - 1.46, 0.003]}>
+          <Text position={[-W / 2 + 0.25, H / 2 - 1.15, 0.005]} fontSize={0.055} color="#ffffff" fillOpacity={0.33} anchorX="left" anchorY="top" letterSpacing={0.12}>CONF</Text>
+          <Text position={[-W / 2 + 0.25, H / 2 - 1.28, 0.005]} fontSize={0.11} color={confColor} anchorX="left" anchorY="top" fontWeight={700}>{confText}</Text>
+          <mesh position={[-W / 2 + 0.5, H / 2 - 1.46, 0.003]}>
             <planeGeometry args={[0.5, 0.02]} />
             <meshBasicMaterial color="#ffffff" transparent opacity={0.05} side={THREE.FrontSide} />
           </mesh>
-          <mesh position={[-W/2 + 0.5 - (0.5 * (1 - data.conf/100)) / 2, H/2 - 1.46, 0.004]}>
+          <mesh position={[-W / 2 + 0.5 - (0.5 * (1 - data.conf / 100)) / 2, H / 2 - 1.46, 0.004]}>
             <planeGeometry args={[0.5 * (data.conf / 100), 0.02]} />
             <meshBasicMaterial color={confColor} transparent opacity={0.7} side={THREE.FrontSide} />
           </mesh>
 
           {/* Volume */}
-          <Text position={[-0.05, H/2 - 1.15, 0.005]} fontSize={0.055} color="#ffffff" fillOpacity={0.33} anchorX="left" anchorY="top" letterSpacing={0.12}>VOL</Text>
-          <Text position={[-0.05, H/2 - 1.28, 0.005]} fontSize={0.11} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>{data.vol || '—'}</Text>
+          <Text position={[-0.05, H / 2 - 1.15, 0.005]} fontSize={0.055} color="#ffffff" fillOpacity={0.33} anchorX="left" anchorY="top" letterSpacing={0.12}>VOL</Text>
+          <Text position={[-0.05, H / 2 - 1.28, 0.005]} fontSize={0.11} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>{data.vol || '—'}</Text>
 
           {/* Signal ID */}
-          <Text position={[W/2 - 0.7, H/2 - 1.15, 0.005]} fontSize={0.055} color="#ffffff" fillOpacity={0.33} anchorX="left" anchorY="top" letterSpacing={0.12}>SIG</Text>
-          <Text position={[W/2 - 0.7, H/2 - 1.28, 0.005]} fontSize={0.11} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>
+          <Text position={[W / 2 - 0.7, H / 2 - 1.15, 0.005]} fontSize={0.055} color="#ffffff" fillOpacity={0.33} anchorX="left" anchorY="top" letterSpacing={0.12}>SIG</Text>
+          <Text position={[W / 2 - 0.7, H / 2 - 1.28, 0.005]} fontSize={0.11} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>
             {String(data.id).padStart(3, '0')}
           </Text>
 
           {/* Analysis */}
-          <mesh position={[0, H/2 - 1.82, 0.002]}>
+          <mesh position={[0, H / 2 - 1.82, 0.002]}>
             <planeGeometry args={[W - 0.3, 0.5]} />
             <meshBasicMaterial color="#061428" transparent opacity={0.3} side={THREE.FrontSide} />
           </mesh>
-          <Text position={[-W/2 + 0.22, H/2 - 1.62, 0.005]} fontSize={0.055} color={accent} anchorX="left" anchorY="top" letterSpacing={0.15}>
+          <Text position={[-W / 2 + 0.22, H / 2 - 1.62, 0.005]} fontSize={0.055} color={accent} anchorX="left" anchorY="top" letterSpacing={0.15}>
             {'◈ ANALYSIS'}
           </Text>
-          <Text position={[-W/2 + 0.22, H/2 - 1.74, 0.005]} fontSize={0.065} color="#ffffff" fillOpacity={0.53} anchorX="left" anchorY="top" maxWidth={W - 0.5} lineHeight={1.4}>
+          <Text position={[-W / 2 + 0.22, H / 2 - 1.74, 0.005]} fontSize={0.065} color="#ffffff" fillOpacity={0.53} anchorX="left" anchorY="top" maxWidth={W - 0.5} lineHeight={1.4}>
             {data.desc || 'Signal analysis pending...'}
           </Text>
 
           {/* Rotate hint at bottom */}
-          <Text position={[0, -H/2 + 0.46, 0.005]} fontSize={0.03} color="#ffffff" fillOpacity={0.2} anchorX="center" anchorY="middle" letterSpacing={0.3}>
+          <Text position={[0, -H / 2 + 0.46, 0.005]} fontSize={0.03} color="#ffffff" fillOpacity={0.2} anchorX="center" anchorY="middle" letterSpacing={0.3}>
             ⟳ DRAG CARD TO ROTATE
           </Text>
 
           {/* Action buttons */}
-          <mesh position={[-0.4, -H/2 + 0.2, 0.003]} onClick={(e) => e.stopPropagation()} onPointerOver={() => { document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = 'default' }}>
+          <mesh position={[-0.4, -H / 2 + 0.2, 0.003]} onClick={(e) => e.stopPropagation()} onPointerOver={() => { document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = 'default' }}>
             <planeGeometry args={[0.8, 0.2]} />
             <meshBasicMaterial color={accent} transparent opacity={0.06} side={THREE.FrontSide} />
           </mesh>
-          <Text position={[-0.4, -H/2 + 0.2, 0.005]} fontSize={0.06} color={accent} anchorX="center" anchorY="middle" letterSpacing={0.1}>◆ EXECUTE</Text>
+          <Text position={[-0.4, -H / 2 + 0.2, 0.005]} fontSize={0.06} color={accent} anchorX="center" anchorY="middle" letterSpacing={0.1}>◆ EXECUTE</Text>
 
-          <mesh position={[0.45, -H/2 + 0.2, 0.003]} onClick={(e) => e.stopPropagation()} onPointerOver={() => { document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = 'default' }}>
+          <mesh position={[0.45, -H / 2 + 0.2, 0.003]} onClick={(e) => e.stopPropagation()} onPointerOver={() => { document.body.style.cursor = 'pointer' }} onPointerOut={() => { document.body.style.cursor = 'default' }}>
             <planeGeometry args={[0.55, 0.2]} />
             <meshBasicMaterial color="#ffffff" transparent opacity={0.03} side={THREE.FrontSide} />
           </mesh>
-          <Text position={[0.45, -H/2 + 0.2, 0.005]} fontSize={0.06} color="#ffffff" fillOpacity={0.47} anchorX="center" anchorY="middle" letterSpacing={0.1}>◇ WATCH</Text>
+          <Text position={[0.45, -H / 2 + 0.2, 0.005]} fontSize={0.06} color="#ffffff" fillOpacity={0.47} anchorX="center" anchorY="middle" letterSpacing={0.1}>◇ WATCH</Text>
         </group>
       </group>
     </group>

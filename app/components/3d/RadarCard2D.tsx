@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useCallback } from 'react'
-import { SIGNALS, POPUP_SLOTS } from '../data/signals'
+import { SIGNALS, POPUP_SLOTS } from '../../radar/data/signals'
 
 interface RadarCard2DProps {
   onClick: () => void
@@ -100,14 +100,14 @@ export default function RadarCard2D({ onClick }: RadarCard2DProps) {
     ctx.fillStyle = grd
     ctx.fill()
 
-    // ── Inner rings ──
-    ;[0.32, 0.62, 0.88].forEach(f => {
-      ctx.beginPath()
-      ctx.arc(RCX, RCY, R * f, 0, Math.PI * 2)
-      ctx.strokeStyle = 'rgba(0,160,200,0.22)'
-      ctx.lineWidth = 0.5
-      ctx.stroke()
-    })
+      // ── Inner rings ──
+      ;[0.32, 0.62, 0.88].forEach(f => {
+        ctx.beginPath()
+        ctx.arc(RCX, RCY, R * f, 0, Math.PI * 2)
+        ctx.strokeStyle = 'rgba(0,160,200,0.22)'
+        ctx.lineWidth = 0.5
+        ctx.stroke()
+      })
 
     // ── Crosshairs ──
     ctx.beginPath()
