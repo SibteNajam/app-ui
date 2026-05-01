@@ -1,5 +1,5 @@
-'use client';
 // @ts-nocheck
+'use client';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
@@ -24,8 +24,8 @@ import * as THREE from 'three'
 const MAX_CONCURRENT = 3
 const SPAWN_RANGE = 140        // how far objects spawn/despawn
 const CLOSEST_APPROACH = 3     // minimum approach to radar center
-const FAR_SCALE = 0.008        // scale multiplier at max distance
-const NEAR_SCALE = 1.0         // scale multiplier at closest approach
+const FAR_SCALE = 0.004        // scale multiplier at max distance
+const NEAR_SCALE = 0.5         // scale multiplier at closest approach
 
 // Spawn timing — irregular patterns that feel organic
 const SPAWN_INTERVALS = {
@@ -122,7 +122,7 @@ function generateFlightPath() {
 // GPU-friendly particle trail that persists in world space
 function ExhaustTrail({ parentRef, type, config }) {
   const pointsRef = useRef()
-  const PARTICLE_COUNT = type === 'jet' ? 80 : type === 'airliner' ? 120 : 0
+  const PARTICLE_COUNT = type === 'jet' ? 40 : type === 'airliner' ? 60 : 0
   
   const particleData = useMemo(() => {
     if (PARTICLE_COUNT === 0) return null
@@ -187,7 +187,7 @@ function ExhaustTrail({ parentRef, type, config }) {
         velocities[i].z += (Math.random() - 0.5) * 0.8 * parentScale
         
         lifetimes[i] = 1.0
-        sizes[i] = (type === 'jet' ? 0.12 : 0.08) * parentScale
+        sizes[i] = (type === 'jet' ? 0.04 : 0.03) * parentScale
         
         // Hot core color
         if (type === 'jet') {
@@ -206,7 +206,7 @@ function ExhaustTrail({ parentRef, type, config }) {
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       if (lifetimes[i] <= 0) continue
       
-      lifetimes[i] -= dt * (type === 'jet' ? 1.2 : 0.6)
+      lifetimes[i] -= dt * (type === 'jet' ? 2.0 : 1.2)
       
       if (lifetimes[i] <= 0) {
         positions[i * 3 + 1] = -9999
@@ -224,7 +224,7 @@ function ExhaustTrail({ parentRef, type, config }) {
       
       // Fade and grow
       const life = lifetimes[i]
-      sizes[i] *= 1.003  // slowly expand
+      sizes[i] *= 1.001  // barely expand
       
       // Color fade: hot → cool
       if (type === 'jet') {
@@ -243,8 +243,8 @@ function ExhaustTrail({ parentRef, type, config }) {
     geo.attributes.color.needsUpdate = true
     geo.attributes.size.needsUpdate = true
     
-    // Global opacity fade based on particle system
-    pointsRef.current.material.opacity = 0.85
+    // Global opacity — subtle, not cloudy
+    pointsRef.current.material.opacity = 0.35
   })
 
   if (!particleData) return null
@@ -273,7 +273,7 @@ function ExhaustTrail({ parentRef, type, config }) {
       </bufferGeometry>
       <pointsMaterial
         vertexColors
-        size={0.15}
+        size={0.05}
         transparent
         opacity={0.85}
         sizeAttenuation
@@ -342,13 +342,13 @@ function DetectionRing({ position, active }) {
 // ─── ASTEROID DEBRIS CLOUD ────────────────────────────────
 function AsteroidDebris({ parentRef }) {
   const pointsRef = useRef()
-  const DEBRIS_COUNT = 30
+  const DEBRIS_COUNT = 12
   
   const debrisData = useMemo(() => {
     const positions = new Float32Array(DEBRIS_COUNT * 3)
     const baseOffsets = []
     for (let i = 0; i < DEBRIS_COUNT; i++) {
-      const r = 0.3 + Math.random() * 1.2
+      const r = 0.15 + Math.random() * 0.35
       const theta = Math.random() * Math.PI * 2
       const phi = Math.acos(2 * Math.random() - 1)
       baseOffsets.push(new THREE.Vector3(
@@ -397,7 +397,7 @@ function AsteroidDebris({ parentRef }) {
       </bufferGeometry>
       <pointsMaterial
         color="#8B7355"
-        size={0.04}
+        size={0.02}
         transparent
         opacity={0.5}
         sizeAttenuation
@@ -463,7 +463,7 @@ function FlyingObject({ config, onComplete, onDetected }) {
         }
       case 'asteroid':
         return {
-          size: 0.5 + Math.random() * 1.5,
+          size: 0.2 + Math.random() * 0.4,
           color: '#7B6B55',
           craterColor: '#5a4a3a',
           baseSpeed: 0.12,

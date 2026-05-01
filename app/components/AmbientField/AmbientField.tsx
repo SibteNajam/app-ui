@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './AmbientField.css';
 
 /* ═══════════════════════════════════════════════════════════
@@ -31,9 +31,13 @@ function makeMotes(n: number): Mote[] {
   return out;
 }
 
-const motes = makeMotes(50);
-
 export default function AmbientField() {
+  const [motes, setMotes] = useState<Mote[]>([]);
+
+  useEffect(() => {
+    setMotes(makeMotes(50));
+  }, []);
+
   return (
     <div className="amb-field" aria-hidden="true">
       {motes.map((m, i) => (

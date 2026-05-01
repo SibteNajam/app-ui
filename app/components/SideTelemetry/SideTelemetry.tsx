@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 const worldMapUrl = '/world.svg';
 import './SideTelemetry.css';
 
@@ -279,23 +280,30 @@ export function SideTelemetryRight() {
 
   return (
     <div className="pro-sidebar-wrap">
-      {/* WORLD MAP ROUTING */}
+      {/* TRADE ROUTING NETWORK */}
       <div className="pd-section head-section" style={{ padding: 0, overflow: 'hidden', border: 'none', background: 'transparent' }}>
         <div style={{ position: 'relative', width: '100%', height: '160px' }}>
           <div style={{ position: 'absolute', inset: 0, opacity: 0.15, backgroundImage: `url(${worldMapUrl})`, backgroundSize: '150%', backgroundPosition: 'center', mixBlendMode: 'screen' }} />
           <svg viewBox="0 0 280 110" style={{ width: '100%', height: '100%', display: 'block', position: 'relative', zIndex: 2 }}>
+            {/* Routing Paths */}
             <path d="M 60 40 Q 100 0 140 30" style={{ fill: 'none', stroke: 'rgba(255,51,102,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }} />
             <path d="M 140 30 Q 180 60 235 45" style={{ fill: 'none', stroke: 'rgba(77,184,106,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }} />
             <path d="M 235 45 Q 150 90 60 40" style={{ fill: 'none', stroke: 'rgba(0,229,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }} />
+            
+            {/* Server Nodes */}
             <circle cx="60" cy="40" r="3" style={{ fill: '#00E5FF' }} />
             <circle cx="140" cy="30" r="3" style={{ fill: '#ff3366' }} />
             <circle cx="235" cy="45" r="3" style={{ fill: '#4DB86A' }} />
+            
+            {/* Data Packets */}
             <circle r="2" fill="#00E5FF"><animateMotion dur="4.5s" repeatCount="indefinite" path="M 235 45 Q 150 90 60 40" /></circle>
             <circle r="2" fill="#ff3366"><animateMotion dur="3.2s" repeatCount="indefinite" path="M 60 40 Q 100 0 140 30" /></circle>
             <circle r="2" fill="#4DB86A"><animateMotion dur="3.8s" repeatCount="indefinite" path="M 140 30 Q 180 60 235 45" /></circle>
-            <text x="60" y="55" fontSize="7" fill={mapTextColor} textAnchor="middle" style={{ fontFamily: 'monospace' }}>USA</text>
-            <text x="140" y="20" fontSize="7" fill={mapTextColor} textAnchor="middle" style={{ fontFamily: 'monospace' }}>UK</text>
-            <text x="235" y="60" fontSize="7" fill={mapTextColor} textAnchor="middle" style={{ fontFamily: 'monospace' }}>HK</text>
+            
+            {/* Trading Infrastructure Labels */}
+            <text x="60" y="55" fontSize="7" fill={mapTextColor} textAnchor="middle" style={{ fontFamily: 'monospace' }}>US-EAST (API)</text>
+            <text x="140" y="20" fontSize="7" fill={mapTextColor} textAnchor="middle" style={{ fontFamily: 'monospace' }}>MATCH ENGINE</text>
+            <text x="235" y="60" fontSize="7" fill={mapTextColor} textAnchor="middle" style={{ fontFamily: 'monospace' }}>LIQUIDITY POOL</text>
           </svg>
         </div>
       </div>
@@ -311,36 +319,49 @@ export function SideTelemetryRight() {
         </div>
       </div>
 
-      {/* SPOT MARKET DATA */}
+      {/* PORTFOLIO HEALTH */}
       <div className="pd-section">
         <div className="pd-header">
           <span className="pd-diamond">◆</span>
-          <span>MARKET DATA — TIA/USDT</span>
+          <span>PORTFOLIO HEALTH</span>
         </div>
+        {/* Prominent Yield Block */}
+        <div style={{
+          background: isLight ? 'rgba(52, 211, 153, 0.05)' : 'rgba(52, 211, 153, 0.08)',
+          border: `1px solid ${isLight ? 'rgba(52, 211, 153, 0.2)' : 'rgba(52, 211, 153, 0.15)'}`,
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', marginBottom: '4px' }}>AVG. YIELD (APY)</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: '#34d399', fontFamily: "'Space Grotesk', sans-serif" }}>+4.28%</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', marginBottom: '4px' }}>EST. MONTHLY</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: isLight ? '#000' : '#fff', fontFamily: "'Space Grotesk', sans-serif" }}>+$145.50</div>
+          </div>
+        </div>
+
         <div className="pd-grid-table">
           <div className="pd-row">
-            <span>MARK PRICE</span>
-            <span style={{ fontWeight: 800 }} className="pd-val-highlight">${metrics.markPrice}</span>
+            <span>ACTIVE PNL</span>
+            <span style={{ color: isLight ? '#2563eb' : '#60a5fa', fontWeight: 800 }}>+$840.00</span>
           </div>
           <div className="pd-row">
-            <span>SPREAD</span>
-            <span>${metrics.spread}</span>
+            <span>30D RETURN</span>
+            <span style={{ color: '#34d399', fontWeight: 800 }}>+2.8%</span>
           </div>
           <div className="pd-row">
-            <span>FUNDING</span>
-            <span style={{ color: fundingColor }}>{metrics.funding >= 0 ? '+' : ''}{(metrics.funding * 100).toFixed(4)}%</span>
+            <span>MAX DRAWDOWN</span>
+            <span style={{ color: '#f87171', fontWeight: 800 }}>-4.1%</span>
           </div>
           <div className="pd-row">
-            <span>OPEN INT.</span>
-            <span>${metrics.oi}M</span>
-          </div>
-          <div className="pd-row">
-            <span>24H VOL</span>
-            <span>${metrics.vol24h}M</span>
-          </div>
-          <div className="pd-row">
-            <span>LIQUIDATIONS</span>
-            <span style={{ color: '#D65C5C' }}>${metrics.liq}M</span>
+            <span>WIN RATE</span>
+            <span className="pd-val-highlight" style={{ fontWeight: 800 }}>62.4%</span>
           </div>
         </div>
       </div>

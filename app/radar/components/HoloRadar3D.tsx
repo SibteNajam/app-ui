@@ -1,5 +1,5 @@
-'use client';
 // @ts-nocheck
+'use client';
 import { useRef, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Text } from '@react-three/drei'

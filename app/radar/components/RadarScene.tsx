@@ -1,5 +1,5 @@
-'use client';
 // @ts-nocheck
+'use client';
 import { useRef, useEffect, useCallback, useMemo } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
@@ -392,7 +392,7 @@ function RadarSceneContent({ isCollapsing, onCollapseComplete, onBlipClick, acti
       </group>
 
       {/* AIR TRAFFIC — jets, airliners, asteroids flying through */}
-      {/* <AirTraffic /> */}
+      <AirTraffic />
 
       {/* BACKGROUND STARS */}
       <BackgroundStars />
@@ -407,12 +407,15 @@ export default function RadarScene({ isCollapsing, onCollapseComplete, onBlipCli
   return (
     <Canvas
       camera={{ fov: 55, near: 0.01, far: 10000, position: [0, 12, -18] }}
-      style={{ width: '100%', height: '100%' }}
-      gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+      style={{ width: '100%', height: '100%', display: 'block' }}
+      gl={{ antialias: true, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: true }}
+      onCreated={({ gl }) => {
+        gl.setClearColor('#020810', 1)
+      }}
     >
-      <color attach="background" args={[0x020810]} />
+      <color attach="background" args={['#020810']} />
       {/* Very distant fog — things fade gently into deep space */}
-      <fog attach="fog" args={[0x020810, 80, 600]} />
+      <fog attach="fog" args={['#020810', 80, 600]} />
 
       <RadarSceneContent
         isCollapsing={isCollapsing}

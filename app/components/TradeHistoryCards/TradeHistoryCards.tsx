@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 import './TradeHistoryCards.css';
 
 /* ══════════════════════════════════════════════════════
@@ -145,6 +146,8 @@ export default function TradeHistoryCards() {
   const [cards, setCards] = useState<TradeData[]>([]);
   const [logos, setLogos] = useState<Record<string, string>>({});
   const [toast, setToast] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
+  const { theme } = useTheme();
   const trackRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const dealIdxRef = useRef(7);
@@ -152,18 +155,17 @@ export default function TradeHistoryCards() {
   /* Logo fetching */
   const fetchLogo = useCallback(async (sym: string) => {
     const name = sym.toLowerCase();
-    const urls = [
-      `https://raw.githubusercontent.com/atomiclabs/cryptocurrency-icons/master/128/color/${name}.png`,
-      `https://cryptologos.cc/logos/${name}-${name}-logo.png`,
-    ];
-    for (const u of urls) {
-      try { const r = await fetch(u, { mode: 'cors' }); if (r.ok) return u; } catch { /* next */ }
-    }
+    const unsupported = ['sei', 'arb', 'tia', 'inj', 'sui', 'wif', 'jup'];
+    if (unsupported.includes(name)) return null;
+
+    const url = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/${name}.png`;
+    try { const r = await fetch(url, { mode: 'cors' }); if (r.ok) return url; } catch { /* next */ }
     return null;
   }, []);
 
   /* Init cards */
   useEffect(() => {
+    setIsMounted(true);
     const initial = POOL.slice(0, 7);
     setCards(initial);
     initial.forEach(d => {
@@ -198,8 +200,8 @@ export default function TradeHistoryCards() {
     return () => clearInterval(interval);
   }, [fetchLogo]);
 
-  if (loading) {
-    const isLight = typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') === 'light' : false;
+  if (!isMounted || loading) {
+    const isLight = theme === 'light';
     const cardBg = isLight ? '#f8fafc' : 'rgba(17, 24, 39, 0.4)';
     const cardBorder = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
 

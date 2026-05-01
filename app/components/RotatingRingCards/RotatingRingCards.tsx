@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 import './RotatingRingCards.css';
 
 /* ══════════════════════════════════════════════════════
@@ -39,11 +40,7 @@ const COINGECKO_URLS: Record<string, string> = {
   SOL:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/sol.png',
   BNB:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/bnb.png',
   AVAX: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/avax.png',
-  ARB:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/arb.png',
   LINK: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/link.png',
-  TIA:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/tia.png',
-  INJ:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/inj.png',
-  SUI:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/sui.png',
 };
 
 
@@ -211,8 +208,11 @@ export default function RotatingRingCards() {
   const [popupData, setPopupData] = useState<TradeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [skelDims, setSkelDims] = useState({ cw: 175, ch: 271, rx: 380, rcx: 500, rcy: 300 });
+  const [isMounted, setIsMounted] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
+    setIsMounted(true);
     function updateSkel() {
       if (!canvasRef.current || !canvasRef.current.parentElement) return;
       const rw = canvasRef.current.parentElement.offsetWidth;
@@ -325,6 +325,10 @@ export default function RotatingRingCards() {
       const ip = c.change >= 0;
       const acc = ip ? '#4DB86A' : '#D65C5C';
       const rgb = ip ? '77,184,106' : '214,92,92';
+
+      if (!Number.isFinite(px) || !Number.isFinite(py) || !Number.isFinite(w) || !Number.isFinite(h)) {
+        return null;
+      }
 
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
@@ -459,6 +463,10 @@ export default function RotatingRingCards() {
     }
 
     function animate() {
+      if (s.RW === 0 || s.RH === 0 || s.CW === 0 || s.CH === 0) {
+        s.animId = requestAnimationFrame(animate);
+        return;
+      }
       s.rTime += 0.016;
       if (!s.rPaused && !s.rDrag) { s.rCards.forEach(c => c.angle += s.rVel); s.rVel += (.0038 - s.rVel) * .03; }
       drawFrame();
@@ -519,7 +527,7 @@ export default function RotatingRingCards() {
     };
   }, [openPopup]);
 
-  const isLight = typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') === 'light' : false;
+  const isLight = theme === 'light';
   const skeletonCardBg = isLight ? '#ffffff' : 'rgba(10, 14, 26, 0.9)';
   const skeletonCardBorder = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';
 
@@ -547,7 +555,7 @@ export default function RotatingRingCards() {
     <>
       <div className="ring-sec" style={{ position: 'relative' }}>
         <canvas ref={canvasRef} className="ring-cv" style={{ opacity: loading ? 0 : 1, transition: 'opacity 0.5s ease' }} />
-        {loading && (
+        {isMounted && loading && (
           <div style={{ position: 'absolute', inset: 0 }}>
             {cards.sort((a, b) => a.depth - b.depth).map((c, i) => (
               <div key={i} style={{ 

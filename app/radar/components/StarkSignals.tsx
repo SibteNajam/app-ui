@@ -1,5 +1,5 @@
-'use client';
 // @ts-nocheck
+'use client';
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Html, Text } from '@react-three/drei'
@@ -22,21 +22,9 @@ const COLOR_PAIRS = [
   ['#ff9944', '#4488ff'],   // orange + royal blue
 ]
 
-function createTwoToneSphere(colorA, colorB, radius) {
-  const geo = new THREE.SphereGeometry(radius, 20, 14)
-  const count = geo.attributes.position.count
-  const colors = new Float32Array(count * 3)
-  const pos = geo.attributes.position
-  const cA = new THREE.Color(colorA)
-  const cB = new THREE.Color(colorB)
-  for (let i = 0; i < count; i++) {
-    const x = pos.getX(i)
-    const c = x >= 0 ? cA : cB
-    colors[i * 3] = c.r
-    colors[i * 3 + 1] = c.g
-    colors[i * 3 + 2] = c.b
-  }
-  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+function createSignalGem(color, radius) {
+  // Sleek diamond/octahedron shape — futuristic signal marker
+  const geo = new THREE.OctahedronGeometry(radius, 1)
   return geo
 }
 
@@ -566,16 +554,16 @@ function ExplodedDotView({ data, colorPair, explodeValue, controlsRef }) {
 
       {/* Rotation group — only this rotates when user drags */}
       <group ref={rotGroupRef}>
-        {/* Top hemisphere — separates upward */}
+        {/* Top half — separates upward */}
         <mesh ref={topHemiRef} rotation={[0, 0, 0]}>
-          <sphereGeometry args={[0.16, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshBasicMaterial color={colorPair[0]} transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} wireframe />
+          <octahedronGeometry args={[0.1, 1]} />
+          <meshBasicMaterial color={colorPair[0]} transparent opacity={0.4} side={THREE.DoubleSide} depthWrite={false} wireframe />
         </mesh>
 
-        {/* Bottom hemisphere — separates downward */}
+        {/* Bottom half — separates downward */}
         <mesh ref={botHemiRef} rotation={[0, 0, 0]}>
-          <sphereGeometry args={[0.16, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2]} />
-          <meshBasicMaterial color={colorPair[1]} transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} wireframe />
+          <octahedronGeometry args={[0.1, 1]} />
+          <meshBasicMaterial color={colorPair[1]} transparent opacity={0.4} side={THREE.DoubleSide} depthWrite={false} wireframe />
         </mesh>
 
         {/* Spread rings */}
@@ -653,8 +641,8 @@ function SignalDot({ data, birthTime, onExpand, onExpired, isAnyExpanded, isExpa
   const posVec = useMemo(() => new THREE.Vector3(...pos), [pos])
   const colorPair = COLOR_PAIRS[(data.id - 1) % COLOR_PAIRS.length]
 
-  const dotGeo = useMemo(() => createTwoToneSphere(
-    colorPair[0], colorPair[1], 0.15
+  const dotGeo = useMemo(() => createSignalGem(
+    colorPair[0], 0.08
   ), [colorPair])
 
   useEffect(() => {
@@ -698,20 +686,20 @@ function SignalDot({ data, birthTime, onExpand, onExpired, isAnyExpanded, isExpa
     const e = expandLerp.current
 
     if (dotRef.current) {
-      dotRef.current.rotation.y = t * 0.8 + id * 1.2
-      dotRef.current.rotation.x = Math.sin(t * 0.4 + id) * 0.2
-      const floatY = Math.sin(t * 0.5 + id * 1.3) * 0.08
+      dotRef.current.rotation.y = t * 1.2 + id * 1.2
+      dotRef.current.rotation.x = Math.sin(t * 0.6 + id) * 0.15
+      const floatY = Math.sin(t * 0.5 + id * 1.3) * 0.04
       dotRef.current.position.y = floatY
-      const s = 1.0 + h * 0.8 + e * 0.5
+      const s = 1.0 + h * 0.4 + e * 0.3
       dotRef.current.scale.setScalar(s)
       // Fade original dot as exploded view takes over
-      dotRef.current.material.opacity = 0.95 * birth * (1 - proximity * 0.8)
+      dotRef.current.material.opacity = 0.9 * birth * (1 - proximity * 0.8)
     }
 
     if (glowRef.current) {
       const p = 0.5 + 0.5 * Math.sin(t * 2 + id)
-      glowRef.current.material.opacity = (0.06 + p * 0.06) + h * 0.08 + e * 0.15 + proximity * 0.05
-      glowRef.current.scale.setScalar(1.0 + p * 0.2 + h * 0.4 + e * 0.5 + proximity * 0.3)
+      glowRef.current.material.opacity = (0.04 + p * 0.04) + h * 0.06 + e * 0.1 + proximity * 0.03
+      glowRef.current.scale.setScalar(1.0 + p * 0.15 + h * 0.25 + e * 0.3 + proximity * 0.2)
     }
 
     const rings = [pulseRing1.current, pulseRing2.current, pulseRing3.current]
@@ -784,22 +772,24 @@ function SignalDot({ data, birthTime, onExpand, onExpired, isAnyExpanded, isExpa
           onPointerOver={handlePointerOver}
           onPointerOut={handlePointerOut}
         >
-          <meshBasicMaterial vertexColors transparent opacity={0.95} />
+          <meshBasicMaterial color={colorPair[0]} transparent opacity={0.9} />
         </mesh>
 
+        {/* Subtle point glow */}
         <mesh ref={glowRef}>
-          <sphereGeometry args={[0.12, 12, 12]} />
-          <meshBasicMaterial color={colorPair[0]} transparent opacity={0.08} depthWrite={false} />
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshBasicMaterial color={colorPair[0]} transparent opacity={0.06} depthWrite={false} blending={THREE.AdditiveBlending} />
         </mesh>
 
         {[pulseRing1, pulseRing2, pulseRing3].map((ref, i) => (
           <mesh key={`pr-${data.id}-${i}`} ref={ref}>
-            <ringGeometry args={[0.28, 0.32, 32]} />
+            <ringGeometry args={[0.14, 0.155, 32]} />
             <meshBasicMaterial
-              color={i === 0 ? colorPair[0] : i === 1 ? colorPair[1] : typeColor}
-              transparent opacity={0.2}
+              color={colorPair[0]}
+              transparent opacity={0.12}
               side={THREE.DoubleSide}
               depthWrite={false}
+              blending={THREE.AdditiveBlending}
             />
           </mesh>
         ))}

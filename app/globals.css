@@ -55,10 +55,7 @@
   --bg-overlay:            rgba(3, 6, 15, 0.65);
   --bg-overlay-stats:      rgba(3, 6, 15, 0.7);
 
-  /* OrderFlowNode */
-  --bg-ofn-card:           linear-gradient(145deg, rgba(12, 14, 28, 0.98) 0%, rgba(8, 10, 20, 1) 100%);
-  --bg-ofn-spine:          rgba(4, 6, 12, 0.2);
-  --bg-ofn-stat-box:       rgba(0, 0, 0, 0.2);
+
 
   /* Space Background */
   --bg-space:              radial-gradient(ellipse at 50% 0%, #0c1225 0%, #070810 40%, #030308 100%);
@@ -126,10 +123,7 @@
   --bg-overlay:            rgba(148, 163, 184, 0.4);
   --bg-overlay-stats:      rgba(148, 163, 184, 0.45);
 
-  /* OrderFlowNode */
-  --bg-ofn-card:           #ffffff;
-  --bg-ofn-spine:          #f8fafc;
-  --bg-ofn-stat-box:       #f1f5f9;
+
 
   /* Space Background — very subtle light wash */
   --bg-space:              radial-gradient(ellipse at 50% 0%, #f8fafc 0%, #f1f5f9 40%, #e2e8f0 100%);
