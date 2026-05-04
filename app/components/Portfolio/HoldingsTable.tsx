@@ -5,19 +5,23 @@ import './HoldingsTable.css';
 
 const getLogoUrl = (id: string) => `https://cryptologos.cc/logos/${id}-logo.png`;
 
-const ASSETS = [
-  { sym:'USDT', name:'Tether', color:'#26a17b', qty: 64.389, price: 1.00, value: 64.389, free: 64.389, locked: 0, id: 'tether-usdt', wallet: 'Spot' },
-  { sym:'BTC', name:'Bitcoin', color:'#f59e0b', qty: 0.0938, price: 57034.20, value: 5349.81, free: 0.0938, locked: 0, id: 'bitcoin-btc', wallet: 'Spot' },
-  { sym:'ETH', name:'Ethereum', color:'#627eea', qty: 0.5939, price: 3185.70, value: 1892.10, free: 0.5939, locked: 0, id: 'ethereum-eth', wallet: 'Funding' },
-  { sym:'SOL', name:'Solana', color:'#9945ff', qty: 12.40, price: 162.29, value: 2012.40, free: 10.0, locked: 2.40, id: 'solana-sol', wallet: 'Spot' },
-  { sym:'BNB', name:'BNB', color:'#f0b90b', qty: 3.20, price: 593.75, value: 1900.00, free: 3.20, locked: 0, id: 'bnb-bnb', wallet: 'Spot' },
-  { sym:'ARB', name:'Arbitrum', color:'#28b9ef', qty: 250.0, price: 1.12, value: 280.00, free: 200.0, locked: 50.0, id: 'arbitrum-arb', wallet: 'Funding' },
-];
+export type AssetData = {
+  sym: string;
+  name: string;
+  color: string;
+  qty: number;
+  price: number;
+  value: number;
+  free: number;
+  locked: number;
+  id: string;
+  wallet: string;
+};
 
-export default function HoldingsTable({ walletFilter, searchQuery }: { walletFilter: string, searchQuery: string }) {
+export default function HoldingsTable({ assets, walletFilter, searchQuery, isLoading }: { assets: AssetData[], walletFilter: string, searchQuery: string, isLoading?: boolean }) {
   const [imgError, setImgError] = useState<Record<string, boolean>>({});
 
-  const filtered = ASSETS.filter(a => {
+  const filtered = assets.filter(a => {
     const matchesSearch = a.sym.toLowerCase().includes(searchQuery.toLowerCase()) || a.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesWallet = walletFilter === 'All' || a.wallet === walletFilter;
     return matchesSearch && matchesWallet;
@@ -75,10 +79,10 @@ export default function HoldingsTable({ walletFilter, searchQuery }: { walletFil
                   {a.qty.toLocaleString()}
                 </td>
                 <td className="right-align ht-td-qty">
-                  {(a.qty * 0.9).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                  {a.free.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                 </td>
                 <td className="right-align ht-td-qty" style={{ color: '#64748b' }}>
-                  {(a.qty * 0.1).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                  {a.locked.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                 </td>
                 <td className="right-align ht-td-val ht-hover-target">
                   ${a.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -88,9 +92,14 @@ export default function HoldingsTable({ walletFilter, searchQuery }: { walletFil
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {filtered.length === 0 && !isLoading && (
               <tr>
-                <td colSpan={6} className="ht-empty">No assets found matching "{searchQuery}" in {walletFilter}</td>
+                <td colSpan={7} className="ht-empty">No assets found matching "{searchQuery}" in {walletFilter}</td>
+              </tr>
+            )}
+            {isLoading && (
+              <tr>
+                <td colSpan={7} className="ht-empty">Loading assets from Binance...</td>
               </tr>
             )}
           </tbody>

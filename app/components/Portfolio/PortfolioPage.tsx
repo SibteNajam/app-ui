@@ -1,43 +1,45 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePortfolioData } from '../../hooks/usePortfolioData';
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
 import './Portfolio.css';
 import HoldingsTable from './HoldingsTable';
 import ConvertSmallAssets from './ConvertSmallAssets';
 
 /* ══ DATA ══════════════════════════════════════ */
-const PERIODS = ['1D','7D','1M','3M','1Y'];
+const PERIODS = ['1D', '7D', '1M', '3M', '1Y'];
 
 // Asset allocation for the multi-arc donut (LeetCode-style)
 const ALLOCATION = [
-  { sym:'BTC', pct:46.8, color:'#f59e0b', val:'$5,350' },
-  { sym:'ETH', pct:16.5, color:'#627eea', val:'$1,892' },
-  { sym:'SOL', pct:17.6, color:'#9945ff', val:'$2,012' },
-  { sym:'BNB', pct:15.6, color:'#f0b90b', val:'$1,900' },
-  { sym:'AVAX', pct:3.5,  color:'#ef4444', val:'$380'   },
+  { sym: 'BTC', pct: 46.8, color: '#f59e0b', val: '$5,350' },
+  { sym: 'ETH', pct: 16.5, color: '#627eea', val: '$1,892' },
+  { sym: 'SOL', pct: 17.6, color: '#9945ff', val: '$2,012' },
+  { sym: 'BNB', pct: 15.6, color: '#f0b90b', val: '$1,900' },
+  { sym: 'AVAX', pct: 3.5, color: '#ef4444', val: '$380' },
 ];
 
 const HOLDINGS = [
-  { sym:'BTC', name:'Bitcoin',   color:'#f59e0b', bg:'rgba(245,158,11,0.15)',   amt:'0.0938', val:'$5,349.81', change:'+3.42%', pos:true  },
-  { sym:'ETH', name:'Ethereum',  color:'#627eea', bg:'rgba(98,126,234,0.15)',   amt:'0.5939', val:'$1,892.10', change:'-1.18%', pos:false },
-  { sym:'SOL', name:'Solana',    color:'#9945ff', bg:'rgba(153,69,255,0.15)',   amt:'12.40',  val:'$2,012.40', change:'+5.67%', pos:true  },
-  { sym:'BNB', name:'BNB',       color:'#f0b90b', bg:'rgba(240,185,11,0.15)',   amt:'3.20',   val:'$1,900.00', change:'+1.23%', pos:true  },
-  { sym:'ARB', name:'Arbitrum',  color:'#28b9ef', bg:'rgba(40,185,239,0.15)',   amt:'250',    val:'$280.00',   change:'+7.34%', pos:true  },
+  { sym: 'BTC', name: 'Bitcoin', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', amt: '0.0938', val: '$5,349.81', change: '+3.42%', pos: true },
+  { sym: 'ETH', name: 'Ethereum', color: '#627eea', bg: 'rgba(98,126,234,0.15)', amt: '0.5939', val: '$1,892.10', change: '-1.18%', pos: false },
+  { sym: 'SOL', name: 'Solana', color: '#9945ff', bg: 'rgba(153,69,255,0.15)', amt: '12.40', val: '$2,012.40', change: '+5.67%', pos: true },
+  { sym: 'BNB', name: 'BNB', color: '#f0b90b', bg: 'rgba(240,185,11,0.15)', amt: '3.20', val: '$1,900.00', change: '+1.23%', pos: true },
+  { sym: 'ARB', name: 'Arbitrum', color: '#28b9ef', bg: 'rgba(40,185,239,0.15)', amt: '250', val: '$280.00', change: '+7.34%', pos: true },
 ];
 
 const EXCHANGES = [
-  { name:'Binance Spot',    type:'My Binance',  val:'$3.26', btc:'0.000041 BTC', active:true  },
-  { name:'Binance Futures', type:'COIN-M',      val:'—',     btc:'Insufficient', active:false },
-  { name:'Binance Futures', type:'USDT-M',      val:'—',     btc:'Insufficient', active:false },
+  { name: 'Binance Spot', type: 'My Binance', val: '$3.26', btc: '0.000041 BTC', active: true },
+  { name: 'Binance Futures', type: 'COIN-M', val: '—', btc: 'Insufficient', active: false },
+  { name: 'Binance Futures', type: 'USDT-M', val: '—', btc: 'Insufficient', active: false },
 ];
 
 /* ══ ICONS ══════════════════════════════════════ */
-const ArrowUp   = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>;
-const ArrowDown = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>;
-const Download  = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
-const Eye       = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
-const Refresh   = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>;
-const Search    = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-const Dots      = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>;
+const ArrowUp = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>;
+const ArrowDown = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" /></svg>;
+const Download = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>;
+const Eye = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>;
+const Refresh = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>;
+const Search = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
+const Dots = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" /></svg>;
 
 /* ══ REALISTIC 3D BADGE ══════════════════════════════════════ */
 function RealisticBadge({ type }: { type: 'emerald' | 'blue' | 'gold' | 'ruby' }) {
@@ -80,17 +82,17 @@ function RealisticBadge({ type }: { type: 'emerald' | 'blue' | 'gold' | 'ruby' }
           <stop offset="100%" stopColor={shapeC2} />
         </radialGradient>
       </defs>
-      
+
       {/* Outer Frame Shape */}
       {type === 'emerald' && (
         <>
-          <path d="M50 2 L93 27 L93 73 L50 98 L7 73 L7 27 Z" fill={`url(#${id}-inner)`} stroke={`url(#${id}-frame)`} strokeWidth="4" strokeLinejoin="round"/>
+          <path d="M50 2 L93 27 L93 73 L50 98 L7 73 L7 27 Z" fill={`url(#${id}-inner)`} stroke={`url(#${id}-frame)`} strokeWidth="4" strokeLinejoin="round" />
           <path d="M50 8 L88 30 L88 70 L50 92 L12 70 L12 30 Z" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
         </>
       )}
       {type === 'blue' && (
         <>
-          <path d="M30 5 L70 5 L95 30 L95 70 L70 95 L30 95 L5 70 L5 30 Z" fill={`url(#${id}-inner)`} stroke={`url(#${id}-frame)`} strokeWidth="4" strokeLinejoin="round"/>
+          <path d="M30 5 L70 5 L95 30 L95 70 L70 95 L30 95 L5 70 L5 30 Z" fill={`url(#${id}-inner)`} stroke={`url(#${id}-frame)`} strokeWidth="4" strokeLinejoin="round" />
           <path d="M33 11 L67 11 L89 33 L89 67 L67 89 L33 89 L11 67 L11 33 Z" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
         </>
       )}
@@ -102,24 +104,24 @@ function RealisticBadge({ type }: { type: 'emerald' | 'blue' | 'gold' | 'ruby' }
       )}
       {type === 'ruby' && (
         <>
-          <path d="M50 4 L96 50 L50 96 L4 50 Z" fill={`url(#${id}-inner)`} stroke={`url(#${id}-frame)`} strokeWidth="4" strokeLinejoin="round"/>
+          <path d="M50 4 L96 50 L50 96 L4 50 Z" fill={`url(#${id}-inner)`} stroke={`url(#${id}-frame)`} strokeWidth="4" strokeLinejoin="round" />
           <path d="M50 11 L89 50 L50 89 L11 50 Z" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
         </>
       )}
-      
+
       {/* Background Text */}
       <text x="18" y="65" fill="rgba(255,255,255,0.15)" fontSize="26" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="-1">{text}</text>
-      
+
       {/* Dynamic Background Design Lines (Primary colored element) */}
       <g stroke={shapeC1} strokeWidth="4" fill="none" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 8px ${shapeC1}aa)` }}>
         {/* Central Kite / Rotated Square Shape */}
-        <path 
-          d="M50 30 L70 50 L50 70 L30 50 Z" 
-          fill={shapeC1} 
-          fillOpacity="0.15" 
-          stroke={shapeC1} 
-          strokeWidth="4" 
-          strokeLinejoin="round" 
+        <path
+          d="M50 30 L70 50 L50 70 L30 50 Z"
+          fill={shapeC1}
+          fillOpacity="0.15"
+          stroke={shapeC1}
+          strokeWidth="4"
+          strokeLinejoin="round"
         />
 
         {/* Lines "coming out" - radiating from corners */}
@@ -153,11 +155,11 @@ function Sparkline({ color }: { color: string }) {
   return (
     <div className="pf-stat-sparkline">
       <svg width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none">
-        <path 
-          d="M0 25 Q 10 5, 20 20 T 40 15 T 60 25 T 80 10 T 100 20" 
-          fill="none" 
-          stroke={color} 
-          strokeWidth="2" 
+        <path
+          d="M0 25 Q 10 5, 20 20 T 40 15 T 60 25 T 80 10 T 100 20"
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
           strokeLinecap="round"
           strokeOpacity="0.4"
         />
@@ -178,14 +180,14 @@ function WinRateRing({ pct }: { pct: number }) {
     }, 300);
     return () => clearTimeout(timer);
   }, [pct, CIRC]);
-  
+
   return (
     <div className="pf-winrate-ring">
       <svg width="32" height="32" viewBox="0 0 32 32">
         <circle cx="16" cy="16" r={R} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
-        <circle 
-          cx="16" cy="16" r={R} fill="none" 
-          stroke="#facc15" strokeWidth="3" 
+        <circle
+          cx="16" cy="16" r={R} fill="none"
+          stroke="#facc15" strokeWidth="3"
           strokeDasharray={CIRC}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -218,11 +220,11 @@ function AllocDonut({ animated }: { animated: boolean }) {
     <div className="pf-alloc-chart">
       <svg width="100%" height="100%" viewBox={`0 0 ${SIZE} ${SIZE}`} className="pf-alloc-svg">
         {/* track */}
-        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={SW}/>
+        <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={SW} />
         {arcs.map((a, i) => (
           <circle
             key={i}
-            cx={SIZE/2} cy={SIZE/2} r={R}
+            cx={SIZE / 2} cy={SIZE / 2} r={R}
             fill="none"
             stroke={a.color}
             strokeWidth={SW}
@@ -254,13 +256,13 @@ function DualLineChart() {
     <div className="pf-chart-svg-wrap">
       <svg width="100%" height="100%" viewBox="0 0 500 140" preserveAspectRatio="none">
         {/* Faint horizontal grid lines */}
-        {[0,1,2,3].map(i => <line key={i} x1="0" y1={i*35 + 10} x2="500" y2={i*35 + 10} stroke="rgba(255,255,255,0.03)" strokeWidth="1"/>)}
-        
+        {[0, 1, 2, 3].map(i => <line key={i} x1="0" y1={i * 35 + 10} x2="500" y2={i * 35 + 10} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />)}
+
         {/* Smooth paths */}
-        <path fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" d={usdPath} className="pf-line-draw"/>
-        <path fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" d={btcPath} className="pf-line-draw" opacity="0.8"/>
-        <path fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" d={avaxPath} className="pf-line-draw" opacity="0.8"/>
-        
+        <path fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" d={usdPath} className="pf-line-draw" />
+        <path fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" d={btcPath} className="pf-line-draw" opacity="0.8" />
+        <path fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" d={avaxPath} className="pf-line-draw" opacity="0.8" />
+
         {/* Ending dots */}
         <circle cx="500" cy="30" r="4" fill="#34d399" />
         <circle cx="500" cy="40" r="3" fill="#f59e0b" />
@@ -268,7 +270,7 @@ function DualLineChart() {
       </svg>
       {/* X-axis labels */}
       <div className="pf-chart-xaxis">
-        {['17 Apr','18 Apr','19 Apr','20 Apr','21 Apr','22 Apr','23 Apr'].map(d=><span key={d}>{d}</span>)}
+        {['17 Apr', '18 Apr', '19 Apr', '20 Apr', '21 Apr', '22 Apr', '23 Apr'].map(d => <span key={d}>{d}</span>)}
       </div>
     </div>
   );
@@ -280,11 +282,34 @@ export default function PortfolioPage() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [animated, setAnimated] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setAnimated(true), 200);
+    setIsMounted(true);
+    const t = setTimeout(() => setAnimated(true), 100);
     return () => clearTimeout(t);
   }, []);
+
+  const { assets, valInt, valDec, totalBtc, isLoading, gain24h, gain24hPct, bestPerformer, totalValue } = usePortfolioData();
+  const { completedTrades } = useDashboardTrades();
+
+  const winRate = completedTrades.length > 0
+    ? Math.round((completedTrades.filter(t => t.pnl.realized >= 0).length / completedTrades.length) * 100)
+    : 0;
+
+  // Realized 24H PnL from completed trades
+  const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const recentTrades = completedTrades.filter(t => {
+    // Find when the trade was closed by checking the latest exit order filledAt time
+    const lastExit = t.exitOrders.reduce((latest: number, exit: any) => Math.max(latest, exit.filledAt), 0);
+    return lastExit >= oneDayAgo;
+  });
+
+  const realized24hPnl = recentTrades.reduce((sum, t) => sum + t.pnl.realized, 0);
+  const realized24hPct = totalValue > 0 ? (realized24hPnl / totalValue) * 100 : 0;
+
+  const gainSign = realized24hPnl >= 0 ? '+' : '';
+  const gainColor = realized24hPnl >= 0 ? '#34d399' : '#f87171';
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = e.currentTarget;
@@ -293,16 +318,18 @@ export default function PortfolioPage() {
     card.style.setProperty('--y', `${e.clientY - rect.top}px`);
   };
 
+  if (!isMounted) return <div className="pf-root" style={{ opacity: 0 }} />;
+
   return (
     <div className="pf-root">
 
       {/* PAGE TITLE */}
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <div>
-          <h1 style={{ fontSize:'26px', fontWeight:800, color:'#fff', letterSpacing:'-0.5px', margin:0 }}>Portfolio</h1>
-          <p style={{ fontSize:'13px', color:'#4a5568', margin:'4px 0 0', fontWeight:500 }}>Track your crypto assets in real-time</p>
+          <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px', margin: 0 }}>Portfolio</h1>
+          <p style={{ fontSize: '13px', color: '#4a5568', margin: '4px 0 0', fontWeight: 500 }}>Track your crypto assets in real-time</p>
         </div>
-        <div style={{ display:'flex', gap:'8px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button className="pf-pill-btn icon-only"><Eye /></button>
           <button className="pf-pill-btn icon-only"><Refresh /></button>
         </div>
@@ -315,15 +342,17 @@ export default function PortfolioPage() {
         <div className="pf-hero-panel pf-hero-left">
           <div className="pf-hero-balance-section">
             <div className="pf-hero-label">
-              <span className="pf-hero-label-dot"/>
+              <span className="pf-hero-label-dot" />
               Total Portfolio Value
             </div>
             <div className="pf-hero-value">
-              $11,434<span className="pf-hero-cents">.31</span>
+              ${isLoading ? '...' : valInt}<span className="pf-hero-cents">.{isLoading ? '00' : (valDec || '00')}</span>
             </div>
             <div className="pf-hero-meta">
-              <span className="pf-hero-change pos">↑ +4.30%</span>
-              <span className="pf-hero-btc">≈ 0.1741 BTC</span>
+              <span className={`pf-hero-change ${realized24hPnl >= 0 ? 'pos' : 'neg'}`}>
+                {realized24hPnl >= 0 ? '↑' : '↓'} {gainSign}{isLoading ? '...' : Math.abs(realized24hPct).toFixed(2)}%
+              </span>
+              <span className="pf-hero-btc">≈ {isLoading ? '...' : totalBtc} BTC</span>
             </div>
             <div className="pf-pill-bar">
               <button className="pf-pill-btn transfer"><ArrowUp /> Transfer</button>
@@ -331,14 +360,14 @@ export default function PortfolioPage() {
               <button className="pf-pill-btn icon-only"><Download /></button>
             </div>
           </div>
-          
+
           <div className="pf-hero-stats-grid">
             {[
-              { type:'emerald', label:'Total Value',    val:'$11,434', sub:'Across 3 exchanges', color: '#34d399' },
-              { type:'blue',    label:'24H Gain',        val:'+$472.80', sub:'↑ 4.30% today',      color: '#60a5fa' },
-              { type:'gold',    label:'Win Rate',         val:'81%',      sub:'Last 30 trades',     color: '#facc15', ring: 81 },
-              { type:'ruby',    label:'Best Performer',   val:'ARB',      sub:'+7.34% today',       color: '#f87171' },
-            ].map((s,i) => (
+              { type: 'emerald', label: 'Total Value', val: `$${isLoading ? '...' : valInt}`, sub: 'Across MEXC account', color: '#34d399' },
+              { type: 'blue', label: '24H Realized PnL', val: isLoading ? '...' : `${gainSign}$${Math.abs(realized24hPnl).toFixed(2)}`, sub: `${realized24hPnl >= 0 ? '↑' : '↓'} ${Math.abs(realized24hPct).toFixed(2)}% vs total`, color: gainColor },
+              { type: 'gold', label: 'Win Rate', val: `${winRate}%`, sub: `Last ${completedTrades.length || 0} trades`, color: '#facc15', ring: winRate },
+              { type: 'ruby', label: 'Best Performer', val: bestPerformer?.sym || '—', sub: bestPerformer ? `${bestPerformer.change24h > 0 ? '+' : ''}${bestPerformer.change24h.toFixed(2)}% today` : 'No data', color: '#f87171' },
+            ].map((s, i) => (
               <div className="pf-stat-row" key={i} onMouseMove={handleMouseMove}>
                 <div className="pf-stat-left">
                   {s.ring ? (
@@ -351,7 +380,7 @@ export default function PortfolioPage() {
                   )}
                   <div className="pf-stat-content">
                     <div className="pf-stat-name">{s.label}</div>
-                    <div className="pf-stat-val" style={{ color: (s.type==='blue' || s.type==='emerald') ? '#34d399' : '' }}>{s.val}</div>
+                    <div className="pf-stat-val" style={{ color: (s.type === 'blue' || s.type === 'emerald') ? '#34d399' : '' }}>{s.val}</div>
                     <div className="pf-stat-sub">{s.sub}</div>
                   </div>
                 </div>
@@ -367,14 +396,14 @@ export default function PortfolioPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span className="pf-chart-title-mini">Performance</span>
               <div className="pf-chart-legend">
-                <span><span className="pf-legend-dot" style={{ background: '#34d399' }}/> USD</span>
-                <span><span className="pf-legend-dot" style={{ background: '#f59e0b' }}/> BTC</span>
-                <span><span className="pf-legend-dot" style={{ background: '#ef4444' }}/> AVAX</span>
+                <span><span className="pf-legend-dot" style={{ background: '#34d399' }} /> USD</span>
+                <span><span className="pf-legend-dot" style={{ background: '#f59e0b' }} /> BTC</span>
+                <span><span className="pf-legend-dot" style={{ background: '#ef4444' }} /> AVAX</span>
               </div>
             </div>
             <div className="pf-period-tabs">
               {PERIODS.map(p => (
-                <button key={p} className={`pf-period-tab${period===p?' active':''}`} onClick={()=>setPeriod(p)}>{p}</button>
+                <button key={p} className={`pf-period-tab${period === p ? ' active' : ''}`} onClick={() => setPeriod(p)}>{p}</button>
               ))}
             </div>
           </div>
@@ -388,7 +417,7 @@ export default function PortfolioPage() {
           <div className="pf-alloc-rows">
             {ALLOCATION.map(a => (
               <div className="pf-alloc-row" key={a.sym}>
-                <span className="pf-alloc-dot" style={{ background: a.color, boxShadow:`0 0 6px ${a.color}66` }}/>
+                <span className="pf-alloc-dot" style={{ background: a.color, boxShadow: `0 0 6px ${a.color}66` }} />
                 <span className="pf-alloc-sym" style={{ color: a.color }}>{a.sym}</span>
                 <div className="pf-alloc-bar-track">
                   <div
@@ -408,15 +437,15 @@ export default function PortfolioPage() {
       {/* ── FILTER BAR ── */}
       <div className="pf-filter-bar">
         <div className="pf-filter-pills">
-          {['All','Spot','Funding'].map(f=>(
-            <button key={f} className={`pf-fpill${activeFilter===f?' active':''}`} onClick={()=>setActiveFilter(f)}>{f}</button>
+          {['All', 'Spot', 'Funding'].map(f => (
+            <button key={f} className={`pf-fpill${activeFilter === f ? ' active' : ''}`} onClick={() => setActiveFilter(f)}>{f}</button>
           ))}
         </div>
         <div className="pf-search">
           <Search />
-          <input 
-            type="text" 
-            placeholder="Search assets..." 
+          <input
+            type="text"
+            placeholder="Search assets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -426,10 +455,10 @@ export default function PortfolioPage() {
       {/* ── LOWER: HOLDINGS TABLE + SMALL ASSETS ── */}
       <div className="pf-lower-v2">
         <div className="pf-lower-main">
-          <HoldingsTable walletFilter={activeFilter} searchQuery={searchQuery} />
+          <HoldingsTable assets={assets} isLoading={isLoading} walletFilter={activeFilter} searchQuery={searchQuery} />
         </div>
         <div className="pf-lower-side">
-          <ConvertSmallAssets />
+          <ConvertSmallAssets allAssets={assets} />
         </div>
       </div>
 

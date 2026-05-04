@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "./context/ThemeContext";
+import Providers from "./components/shared/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
   description: "Professional crypto trading bot dashboard with real-time analytics",
 };
 
+// This stays a Server Component — no 'use client' here
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -15,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

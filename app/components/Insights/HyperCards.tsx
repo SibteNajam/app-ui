@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
+import { useMemo } from 'react';
 
 /* ── Radial Sunburst Helpers (for HyperCard1) ── */
 function getColorGradient(progress: number, stops: { p: number; c: number[] }[]) {
@@ -146,46 +148,95 @@ const fadeUp: any = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0
 export function HyperCard1() {
   const { theme } = useTheme();
   const dk = theme === 'dark';
+  const { completedTrades } = useDashboardTrades();
+
+  const { monthlyVolume, topPairs, winRate, maxStreak, profitFactor } = useMemo(() => {
+    let mVol = 0;
+    const pairs = {};
+    const now = Date.now();
+    const thirtyDays = 30 * 86400000;
+
+    let wins = 0, losses = 0;
+    let maxS = 0, currS = 0;
+    let totalWinPnl = 0, totalLossPnl = 0;
+
+    const sorted = [...completedTrades].sort((a, b) => (a.entryOrder?.filledAt || 0) - (b.entryOrder?.filledAt || 0));
+
+    sorted.forEach(t => {
+      const sym = t.entryOrder?.symbol || 'Unknown';
+      let vol = (t.entryOrder?.price * t.entryOrder?.executedQty) || 0;
+      t.exitOrders?.forEach(ex => { vol += (ex.price * ex.executedQty) || 0; });
+      
+      const tTime = t.entryOrder?.filledAt || 0;
+      if (now - tTime <= thirtyDays) mVol += vol;
+      
+      pairs[sym] = (pairs[sym] || 0) + vol;
+
+      const pnl = t.pnl.realized;
+      if (pnl >= 0) {
+        wins++;
+        totalWinPnl += pnl;
+        currS++;
+        if (currS > maxS) maxS = currS;
+      } else {
+        losses++;
+        totalLossPnl += Math.abs(pnl);
+        currS = 0;
+      }
+    });
+
+    const top = Object.entries(pairs)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([k, v]) => ({ k, v: v > 1000 ? '$' + (v / 1000).toFixed(1) + 'k' : '$' + v.toFixed(0) }));
+
+    const total = wins + losses || 1;
+    const wr = ((wins / total) * 100).toFixed(1);
+    const pf = totalLossPnl > 0 ? (totalWinPnl / totalLossPnl).toFixed(2) : totalWinPnl > 0 ? '>10' : '0.00';
+
+    return { monthlyVolume: mVol, topPairs: top, winRate: wr, maxStreak: maxS, profitFactor: pf };
+  }, [completedTrades]);
+
+  const formatVol = (v) => v > 1000000 ? '$' + (v / 1000000).toFixed(2) + 'M' : '$' + (v / 1000).toFixed(1) + 'k';
 
   return (
-    <motion.div className="hyper-card" variants={fadeUp} whileHover={{ y: -4 }} style={{ padding: '24px 20px' }}>
-      <div style={{ fontSize: 16, fontWeight: 700, color: dk ? '#fff' : '#000', marginBottom: 12 }}>Execution Volume</div>
-      <RadialSunburst value="4,120" iconMode="crosshair" palette={PALETTES.default} maxActive={32} />
+    <motion.div className="hyper-card" variants={fadeUp} whileHover={{ y: -4 }} style={{ padding: '24px 20px', flex: 1 }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: dk ? '#fff' : '#000', marginBottom: 12 }}>Execution & Win Analysis</div>
+      <RadialSunburst value={winRate + '%'} iconMode="crosshair" palette={PALETTES.default} maxActive={Math.max(1, Math.floor(parseFloat(winRate)/100 * 36))} />
 
       <div className="hc-periods" style={{ borderTop: 'none', paddingTop: 0, marginBottom: 16, gap: 16 }}>
         <div className="hc-period">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: dk ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>
-            <span style={{ color: '#34d399', fontSize: 14 }}>✦</span> Monthly
+            <span style={{ color: '#34d399', fontSize: 14 }}>✦</span> Monthly Vol
           </div>
-          <div className="hc-pval" style={{ fontSize: 22 }}>$4.82M</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-            <span className="hc-ptrend up" style={{ fontSize: 10 }}>↑12.4%</span>
-            <span style={{ fontSize: 10, color: dk ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)' }}>Volume</span>
-          </div>
+          <div className="hc-pval" style={{ fontSize: 18 }}>{formatVol(monthlyVolume)}</div>
         </div>
         <div className="hc-period">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: dk ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>
-            <span style={{ color: '#fbbf24', fontSize: 14 }}>✦</span> Yearly
+            <span style={{ color: '#fbbf24', fontSize: 14 }}>✦</span> Best Streak
           </div>
-          <div className="hc-pval" style={{ fontSize: 22 }}>$52.41M</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-            <span className="hc-ptrend up" style={{ fontSize: 10 }}>↑8.2%</span>
-            <span style={{ fontSize: 10, color: dk ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)' }}>Volume</span>
-          </div>
+          <div className="hc-pval" style={{ fontSize: 18 }}>{maxStreak} wins</div>
         </div>
       </div>
 
-      <div className="hc-rows" style={{ borderTop: 'none', display: 'flex', flexDirection: 'column', gap: 0, paddingTop: 0 }}>
-        {[
-          { k: 'BTC/USDT', v: '24,512' },
-          { k: 'ETH/USDT', v: '18,294' },
-          { k: 'SOL/USDT', v: '12,105' },
-        ].map(({ k, v }, i) => (
-          <div className="hc-row" key={k} style={{ padding: '10px 0', borderBottom: i < 2 ? `1px solid ${dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` : 'none' }}>
+      <div className="hc-rows" style={{ borderTop: 'none', display: 'flex', flexDirection: 'column', gap: 0, paddingTop: 0, borderBottom: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`, paddingBottom: 10, marginBottom: 10 }}>
+        {topPairs.map(({ k, v }, i) => (
+          <div className="hc-row" key={k} style={{ padding: '6px 0' }}>
             <span style={{ color: dk ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500 }}>{k}</span>
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: dk ? '#fff' : '#000' }}>{v}</span>
           </div>
         ))}
+      </div>
+      
+      <div className="hc-rows" style={{ borderTop: 'none', display: 'flex', flexDirection: 'column', gap: 0, paddingTop: 0 }}>
+        <div className="hc-row" style={{ padding: '6px 0' }}>
+          <span style={{ color: dk ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500 }}>Profit Factor</span>
+          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: dk ? '#fff' : '#000' }}>{profitFactor}</span>
+        </div>
+        <div className="hc-row" style={{ padding: '6px 0' }}>
+          <span style={{ color: dk ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500 }}>Total Trades</span>
+          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: dk ? '#fff' : '#000' }}>{completedTrades.length}</span>
+        </div>
       </div>
     </motion.div>
   );
@@ -252,6 +303,19 @@ function RadarLineChart({ data, dk }: { data: number[], dk: boolean }) {
 }
 
 export function DynamicRingChart({ dk }: { dk: boolean }) {
+  const { completedTrades } = useDashboardTrades();
+  
+  const stats = useMemo(() => {
+    let wins = 0, totalPnl = 0;
+    completedTrades.forEach(t => {
+      if (t.pnl.realized >= 0) wins++;
+      totalPnl += t.pnl.realized;
+    });
+    const total = completedTrades.length || 1;
+    const wr = Math.round((wins / total) * 100);
+    return { wr, total, totalPnl };
+  }, [completedTrades]);
+
   const S = 220, cx = S / 2, cy = S / 2;
   const faintColor = dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   const numTicks = 120;
@@ -260,9 +324,9 @@ export function DynamicRingChart({ dk }: { dk: boolean }) {
   const ringR = 51;
   const C = 2 * Math.PI * ringR;
 
-  const cyanLen = C * 0.45;
+  const cyanLen = C * (stats.wr / 100);
   const orangeLen = C * 0.15;
-  const purpleLen = C * 0.25;
+  const purpleLen = C * Math.max(0, 1 - (stats.wr/100) - 0.15);
   const gap1 = C * 0.02;
   const gap2 = C * 0.03;
 
@@ -305,20 +369,14 @@ export function DynamicRingChart({ dk }: { dk: boolean }) {
             <rect x="-1" y="-5" width="2" height="11" rx="1" fill={dk ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)"} />
             <rect x="3" y="1" width="2" height="5" rx="1" fill={dk ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} />
           </g>
-          <text x={cx} y={cy + 2} textAnchor="middle" fill={dk ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} fontSize={6.5} fontWeight={600} letterSpacing={0.5} fontFamily="'Space Grotesk', sans-serif">STORE DYNAMICS</text>
-          <text x={cx - 4} y={cy + 22} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={26} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">87</text>
+          <text x={cx} y={cy + 2} textAnchor="middle" fill={dk ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} fontSize={6.5} fontWeight={600} letterSpacing={0.5} fontFamily="'Space Grotesk', sans-serif">WIN RATE</text>
+          <text x={cx - 4} y={cy + 22} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={26} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">{stats.wr}</text>
           <text x={cx + 14} y={cy + 14} textAnchor="start" fill={dk ? "#fff" : "#000"} fontSize={11} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">%</text>
 
           <g transform={`translate(${cx + 80 * Math.cos(-Math.PI * 0.15)}, ${cy + 80 * Math.sin(-Math.PI * 0.15)})`}>
             <circle cx={0} cy={0} r={16} fill={dk ? '#0a0e1a' : '#fff'} stroke="#f97316" strokeWidth={1.5} filter="url(#glowOrange2)" />
-            <text x={0} y={-4} textAnchor="middle" fill="#f97316" fontSize={6} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">PLAN</text>
-            <text x={0} y={6} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={11} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">67<tspan fontSize={7}>%</tspan></text>
-          </g>
-
-          <g transform={`translate(${cx + 80 * Math.cos(Math.PI * 0.12)}, ${cy + 80 * Math.sin(Math.PI * 0.12)})`}>
-            <circle cx={0} cy={0} r={14} fill={dk ? '#0a0e1a' : '#fff'} stroke="#a855f7" strokeWidth={1.5} filter="url(#glowPurple2)" />
-            <text x={0} y={-3} textAnchor="middle" fill="#a855f7" fontSize={5} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">MONTH</text>
-            <text x={0} y={6} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={10} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">54<tspan fontSize={6}>%</tspan></text>
+            <text x={0} y={-4} textAnchor="middle" fill="#f97316" fontSize={5} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">TRADES</text>
+            <text x={0} y={6} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={11} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">{stats.total}</text>
           </g>
 
           <g transform={`translate(${cx + 100 * Math.cos(-Math.PI * 0.03)}, ${cy + 100 * Math.sin(-Math.PI * 0.03)})`}>
@@ -330,15 +388,10 @@ export function DynamicRingChart({ dk }: { dk: boolean }) {
           <g transform={`translate(${cx - 90}, ${cy - 20})`}>
             <circle cx={0} cy={0} r={8} fill="none" stroke={faintColor} strokeWidth={1} />
             <circle cx={0} cy={0} r={3} fill="none" stroke={faintColor} strokeWidth={1} />
-            <text x={0} y={15} textAnchor="middle" fill={dk ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} fontSize={6.5}>Views</text>
-            <text x={0} y={24} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={9} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">41,978</text>
-          </g>
-
-          <g transform={`translate(${cx + 80}, ${cy + 60})`}>
-            <circle cx={0} cy={0} r={8} fill="none" stroke={faintColor} strokeWidth={1} />
-            <rect x="-3" y="-3" width="6" height="5" fill="none" stroke={faintColor} strokeWidth={1} />
-            <text x={0} y={15} textAnchor="middle" fill={dk ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} fontSize={6.5}>Sales</text>
-            <text x={0} y={24} textAnchor="middle" fill={dk ? "#fff" : "#000"} fontSize={9} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">32,123</text>
+            <text x={0} y={15} textAnchor="middle" fill={dk ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} fontSize={6.5}>Realized P&L</text>
+            <text x={0} y={24} textAnchor="middle" fill={stats.totalPnl >= 0 ? "#34d399" : "#f87171"} fontSize={9} fontWeight={700} fontFamily="'Space Grotesk', sans-serif">
+              ${stats.totalPnl.toFixed(2)}
+            </text>
           </g>
         </svg>
       </div>
@@ -347,56 +400,14 @@ export function DynamicRingChart({ dk }: { dk: boolean }) {
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: dk ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', padding: '6px 14px', borderRadius: 20, border: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-             <span style={{ fontSize: 10, color: dk ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontWeight: 500 }}>Profitability</span>
-             <span style={{ fontSize: 11, color: dk ? '#fff' : '#000', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>86%</span>
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 20, padding: '0 8px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 18, paddingBottom: 1 }}>
-            {[4, 8, 14, 18, 10, 6, 12, 16].map((h, i) => (
-              <div key={i} style={{ width: 3, height: h, background: '#06b6d4', borderRadius: 1.5 }} />
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: dk ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <svg width="9" height="9" viewBox="0 0 24 24" fill="#a855f7" stroke="#a855f7" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <span style={{ fontSize: 8, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Active Users</span>
-                <span style={{ fontSize: 14, color: dk ? '#fff' : '#000', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif", lineHeight: 1 }}>546</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', width: '100%', height: 2, borderRadius: 1, background: dk ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-              <div style={{ width: '60%', background: '#a855f7' }} />
-              <div style={{ width: '20%', background: '#06b6d4' }} />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: dk ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <svg width="9" height="9" viewBox="0 0 24 24" fill="#5b21b6" stroke="#a855f7" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <span style={{ fontSize: 8, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Server</span>
-                <span style={{ fontSize: 14, color: dk ? '#fff' : '#000', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif", lineHeight: 1 }}>546</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', width: '100%', gap: 2 }}>
-              <div style={{ flex: 1, height: 2, background: '#f97316', borderRadius: 1 }} />
-              <div style={{ flex: 1, height: 2, background: '#f97316', borderRadius: 1 }} />
-              <div style={{ flex: 1, height: 2, background: '#f97316', borderRadius: 1 }} />
-            </div>
+             <span style={{ fontSize: 10, color: dk ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontWeight: 500 }}>Overall P&L</span>
+             <span style={{ fontSize: 11, color: stats.totalPnl >= 0 ? '#34d399' : '#f87171', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>${stats.totalPnl.toFixed(2)}</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
 export function HyperCard2() {
   const { theme } = useTheme();
   const dk = theme === 'dark';

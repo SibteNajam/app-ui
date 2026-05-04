@@ -1,6 +1,8 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
+import DataStatus from '../shared/DataStatus';
 const worldMapUrl = '/world.svg';
 import './SideTelemetry.css';
 
@@ -72,7 +74,7 @@ export function SideTelemetryLeft() {
 /* ─────────────────────────────────────────────────────────────
    ECG / GRADIENT FLOW CHART COMPONENT
    ───────────────────────────────────────────────────────────── */
-function EcgFlowChart() {
+const EcgFlowChart = React.memo(function EcgFlowChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -225,7 +227,7 @@ function EcgFlowChart() {
   }, []);
 
   return <canvas ref={canvasRef} style={{ width: '100%', height: '80px', display: 'block' }} />;
-}
+});
 
 /* ─────────────────────────────────────────────────────────────
    RIGHT OVERLAY - ULTRA-CLEAN DATA MATRIX
@@ -236,6 +238,8 @@ export function SideTelemetryRight() {
     slippage: 0.003, latency: 12, tps: 840,
     spread: 0.012, funding: 0.0035, oi: 284.5, markPrice: 9.142, vol24h: 182.4, liq: 2.1
   });
+
+  const { summary, isLoading: apiLoading, isError, isFetching, error } = useDashboardTrades();
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -280,6 +284,7 @@ export function SideTelemetryRight() {
 
   return (
     <div className="pro-sidebar-wrap">
+      <DataStatus isError={isError} isFetching={isFetching && !apiLoading} error={error as Error | null} />
       {/* TRADE ROUTING NETWORK */}
       <div className="pd-section head-section" style={{ padding: 0, overflow: 'hidden', border: 'none', background: 'transparent' }}>
         <div style={{ position: 'relative', width: '100%', height: '160px' }}>
@@ -337,31 +342,43 @@ export function SideTelemetryRight() {
           alignItems: 'center'
         }}>
           <div>
-            <div style={{ fontSize: '10px', fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', marginBottom: '4px' }}>AVG. YIELD (APY)</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#34d399', fontFamily: "'Space Grotesk', sans-serif" }}>+4.28%</div>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', marginBottom: '4px' }}>TOTAL PnL %</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: '#34d399', fontFamily: "'Space Grotesk', sans-serif" }}>
+              {summary ? `${summary.pnlPercentage >= 0 ? '+' : ''}${summary.pnlPercentage.toFixed(2)}%` : '+0.00%'}
+            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', marginBottom: '4px' }}>EST. MONTHLY</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: isLight ? '#000' : '#fff', fontFamily: "'Space Grotesk', sans-serif" }}>+$145.50</div>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', marginBottom: '4px' }}>REALIZED PnL</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: isLight ? '#000' : '#fff', fontFamily: "'Space Grotesk', sans-serif" }}>
+              {summary ? `${summary.totalRealizedPnl >= 0 ? '+$' : '-$'}${Math.abs(summary.totalRealizedPnl).toFixed(2)}` : '+$0.00'}
+            </div>
           </div>
         </div>
 
         <div className="pd-grid-table">
           <div className="pd-row">
             <span>ACTIVE PNL</span>
-            <span style={{ color: isLight ? '#2563eb' : '#60a5fa', fontWeight: 800 }}>+$840.00</span>
+            <span style={{ color: isLight ? '#2563eb' : '#60a5fa', fontWeight: 800 }}>
+              {summary ? `${summary.totalUnrealizedPnl >= 0 ? '+$' : '-$'}${Math.abs(summary.totalUnrealizedPnl).toFixed(2)}` : '+$0.00'}
+            </span>
           </div>
           <div className="pd-row">
-            <span>30D RETURN</span>
-            <span style={{ color: '#34d399', fontWeight: 800 }}>+2.8%</span>
+            <span>TOTAL PnL</span>
+            <span style={{ color: (summary?.totalPnl ?? 0) >= 0 ? '#34d399' : '#f87171', fontWeight: 800 }}>
+              {summary ? `${summary.totalPnl >= 0 ? '+$' : '-$'}${Math.abs(summary.totalPnl).toFixed(2)}` : '+$0.00'}
+            </span>
           </div>
           <div className="pd-row">
-            <span>MAX DRAWDOWN</span>
-            <span style={{ color: '#f87171', fontWeight: 800 }}>-4.1%</span>
+            <span>TRADES</span>
+            <span style={{ color: '#f87171', fontWeight: 800 }}>
+              {summary ? `${summary.completedTrades}/${summary.totalTrades}` : '—'}
+            </span>
           </div>
           <div className="pd-row">
-            <span>WIN RATE</span>
-            <span className="pd-val-highlight" style={{ fontWeight: 800 }}>62.4%</span>
+            <span>ACTIVE</span>
+            <span className="pd-val-highlight" style={{ fontWeight: 800 }}>
+              {summary?.activeTrades ?? 0}
+            </span>
           </div>
         </div>
       </div>

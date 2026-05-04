@@ -1,23 +1,22 @@
 'use client';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
 import './RotatingRingCards.css';
 
 /* ══════════════════════════════════════════════════════
    DATA & CONFIG
    ══════════════════════════════════════════════════════ */
 
-const POOL = [
-  { sym: 'BTC', pair: 'BTC/USDT', price: 64820, change: 3.42, vol: '$42.1B', dir: 'SPOT BUY', lev: '10x', pnl: 420.30 },
-  { sym: 'ETH', pair: 'ETH/USDT', price: 3191, change: -1.18, vol: '$18.4B', dir: 'SPOT BUY', lev: '5x', pnl: -88.50 },
-  { sym: 'SOL', pair: 'SOL/USDT', price: 161, change: 5.67, vol: '$4.2B', dir: 'SPOT BUY', lev: '3x', pnl: 310.80 },
-  { sym: 'BNB', pair: 'BNB/USDT', price: 594, change: 1.23, vol: '$1.8B', dir: 'SPOT BUY', lev: '7x', pnl: 199.70 },
-  { sym: 'AVAX', pair: 'AVAX/USDT', price: 38.4, change: -2.11, vol: '$620M', dir: 'SPOT BUY', lev: '4x', pnl: -44.20 },
-  { sym: 'ARB', pair: 'ARB/USDT', price: 1.12, change: 7.34, vol: '$310M', dir: 'SPOT BUY', lev: '5x', pnl: 88.60 },
-  { sym: 'LINK', pair: 'LINK/USDT', price: 14.82, change: 0.88, vol: '$540M', dir: 'SPOT BUY', lev: '3x', pnl: 22.10 },
-];
-
-type TradeData = typeof POOL[0];
+interface TradeData {
+  sym: string;
+  pair: string;
+  price: number;
+  change: number;
+  vol: string;
+  dir: string;
+  pnl: number;
+}
 
 function getCoinColors(symbol: string) {
   const colorMap: Record<string, { neon: string; dark: string; hex: string }> = {
@@ -211,6 +210,30 @@ export default function RotatingRingCards() {
   const [isMounted, setIsMounted] = useState(false);
   const { theme } = useTheme();
 
+  // Use completed trades (most recent) for the rotating ring so it shows recent history
+  const { completedTrades } = useDashboardTrades();
+
+  const POOL = useMemo<TradeData[]>(() =>
+    // sort by entry timestamp (most recent first) and map to display shape
+    completedTrades
+      .slice()
+      .sort((a, b) => (b.entryOrder?.filledAt ?? 0) - (a.entryOrder?.filledAt ?? 0))
+      .slice(0, 50)
+      .map(trade => ({
+        sym: trade.entryOrder.symbol?.replace('USDT', '') ?? 'N/A',
+        pair: `${trade.entryOrder.symbol?.replace('USDT', '')}/USDT`,
+        price: trade.pnl.currentMarketPrice,
+        change: trade.pnl.totalPercent,
+        vol: `$${trade.pnl.entryCost.toFixed(2)}`,
+        dir: trade.entryOrder.side ?? 'BUY',
+        pnl: trade.pnl.total,
+      })),
+  [completedTrades]);
+
+  // Ref lets the canvas useEffect always read the latest POOL without re-running
+  const poolRef = useRef<TradeData[]>(POOL);
+  useEffect(() => { poolRef.current = POOL; }, [POOL]);
+
   useEffect(() => {
     setIsMounted(true);
     function updateSkel() {
@@ -239,6 +262,61 @@ export default function RotatingRingCards() {
     });
   }, []);
 
+  // Resolve & preload logos using CoinGecko first, then cryptologos, then jsDelivr fallback
+  useEffect(() => {
+    let cancelled = false;
+    async function resolveLogoUrl(sym: string): Promise<string | null> {
+      const name = sym.toLowerCase();
+      try {
+        const q = encodeURIComponent(sym);
+        const r = await fetch(`https://api.coingecko.com/api/v3/search?query=${q}`);
+        if (r.ok) {
+          const j = await r.json();
+          const coins = Array.isArray(j.coins) ? j.coins : [];
+          const match = coins.find((c: any) => (c.symbol || '').toLowerCase() === name) || coins[0];
+          if (match && (match.large || match.thumb)) {
+            const img = match.large ?? match.thumb;
+            try { const rr = await fetch(img, { mode: 'cors' }); if (rr.ok) return img; } catch {}
+          }
+        }
+      } catch {}
+
+      try {
+        const cryptoUrl = `https://cryptologos.cc/logos/${name}-logo.png`;
+        const r2 = await fetch(cryptoUrl, { mode: 'cors' });
+        if (r2.ok) return cryptoUrl;
+      } catch {}
+
+      try {
+        const cdn = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/${name}.png`;
+        const r3 = await fetch(cdn, { mode: 'cors' });
+        if (r3.ok) return cdn;
+      } catch {}
+
+      return null;
+    }
+
+    async function preloadForPool() {
+      const syms = Array.from(new Set(POOL.map(p => p.sym)));
+      for (const s of syms) {
+        if (cancelled) return;
+        if (logoImgsRef.current[s]) continue;
+        const url = await resolveLogoUrl(s);
+        if (!url) continue;
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => { logoImgsRef.current[s] = img; };
+          img.onerror = () => { /* ignore */ };
+          img.src = url;
+        } catch {}
+      }
+    }
+
+    preloadForPool();
+    return () => { cancelled = true; };
+  }, [POOL]);
+
   // Use refs for all mutable state to avoid re-renders
   const stateRef = useRef({
     RW: 0, RH: 0, RCX: 0, RCY: 0, RX: 0, RY: 0, CW: 0, CH: 0,
@@ -254,6 +332,7 @@ export default function RotatingRingCards() {
     dealIdx: 7,
     animId: 0,
     dealInterval: 0,
+    animIntervals: [] as number[],
   });
 
   const openPopup = useCallback((data: TradeData) => {
@@ -287,11 +366,13 @@ export default function RotatingRingCards() {
 
     function initRCards() {
       s.rCards = [];
-      POOL.slice(0, 7).forEach((d, i) => {
+      const initial = poolRef.current.slice(0, 10);
+      const n = Math.max(initial.length, 1);
+      initial.forEach((d, i) => {
         const th = Math.floor(Math.random() * 12) + 1;
         const tm = Math.floor(Math.random() * 60);
         // logoImg is no longer used — canvas reads from logoImgsRef instead
-        const card: RCard = { data: d, angle: (i / 7) * Math.PI * 2, entryDone: true, entryAnim: 1, logoImg: null, tradeTime: `${th}h ${tm}m ago` };
+        const card: RCard = { data: d, angle: (i / n) * Math.PI * 2, entryDone: true, entryAnim: 1, logoImg: null, tradeTime: `${th}h ${tm}m ago` };
         s.rCards.push(card);
       });
     }
@@ -463,10 +544,13 @@ export default function RotatingRingCards() {
     }
 
     function animate() {
+      if (!canvasRef.current || !canvasRef.current.parentElement) return;
       if (s.RW === 0 || s.RH === 0 || s.CW === 0 || s.CH === 0) {
         s.animId = requestAnimationFrame(animate);
         return;
       }
+      // Re-init if pool arrived after mount (API response latency)
+      if (s.rCards.length === 0 && poolRef.current.length > 0) { initRCards(); }
       s.rTime += 0.016;
       if (!s.rPaused && !s.rDrag) { s.rCards.forEach(c => c.angle += s.rVel); s.rVel += (.0038 - s.rVel) * .03; }
       drawFrame();
@@ -474,20 +558,24 @@ export default function RotatingRingCards() {
     }
 
     function dealNew() {
-      const data = POOL[s.dealIdx % POOL.length];
+      const pool = poolRef.current;
+      if (!pool.length) return;
+      const data = pool[s.dealIdx % pool.length];
       s.dealIdx++;
-      if (s.rCards.length < 12) {
-        const th = Math.floor(Math.random() * 12) + 1; const tm = Math.floor(Math.random() * 60);
-        const card: RCard = { data, angle: Math.PI, entryDone: false, entryAnim: 0, logoImg: null, tradeTime: `${th}h ${tm}m ago` };
-        s.rCards.push(card);
-        const nc = s.rCards[s.rCards.length - 1];
-        // logo now sourced from logoImgsRef DOM pool — no fetch needed
-        const iv = setInterval(() => { nc.entryAnim += .04; if (nc.entryAnim >= 1) { nc.entryDone = true; clearInterval(iv); } }, 16);
-        const N = s.rCards.length; const ta = s.rCards.map((_, i) => (i / N) * Math.PI * 2); const sa = s.rCards.map(c => c.angle);
-        let t2 = 0;
-        const iv2 = setInterval(() => { t2 += .04; if (t2 >= 1) { t2 = 1; clearInterval(iv2); } const e = t2 < .5 ? 2 * t2 * t2 : (4 - 2 * t2) * t2 - 1; s.rCards.forEach((c, i) => { c.angle = sa[i] + (ta[i] - sa[i]) * e; }); }, 16);
-        for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2; const sp = 1.5 + Math.random() * 2.5; s.particles.push({ x: s.RCX + s.RX * Math.cos(Math.PI), y: s.RCY + s.RY * Math.sin(Math.PI), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - .8, r: 1 + Math.random() * 2, life: 0, maxLife: 44 + Math.random() * 24 }); }
-      }
+      
+      if (s.rCards.length >= 12) s.rCards.shift();
+      const th = Math.floor(Math.random() * 12) + 1; const tm = Math.floor(Math.random() * 60);
+      const card: RCard = { data, angle: Math.PI, entryDone: false, entryAnim: 0, logoImg: null, tradeTime: `${th}h ${tm}m ago` };
+      s.rCards.push(card);
+      const nc = s.rCards[s.rCards.length - 1];
+      if (!s.animIntervals) s.animIntervals = [];
+      const iv = window.setInterval(() => { nc.entryAnim += .04; if (nc.entryAnim >= 1) { nc.entryDone = true; clearInterval(iv); } }, 16);
+      s.animIntervals.push(iv);
+      const N = s.rCards.length; const ta = s.rCards.map((_, i) => (i / N) * Math.PI * 2); const sa = s.rCards.map(c => c.angle);
+      let t2 = 0;
+      const iv2 = window.setInterval(() => { t2 += .04; if (t2 >= 1) { t2 = 1; clearInterval(iv2); } const e = t2 < .5 ? 2 * t2 * t2 : (4 - 2 * t2) * t2 - 1; s.rCards.forEach((c, i) => { c.angle = sa[i] + (ta[i] - sa[i]) * e; }); }, 16);
+      s.animIntervals.push(iv2);
+      for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2; const sp = 1.5 + Math.random() * 2.5; s.particles.push({ x: s.RCX + s.RX * Math.cos(Math.PI), y: s.RCY + s.RY * Math.sin(Math.PI), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - .8, r: 1 + Math.random() * 2, life: 0, maxLife: 44 + Math.random() * 24 }); }
     }
 
     /* ── Mouse Events ── */
@@ -511,11 +599,12 @@ export default function RotatingRingCards() {
     resize();
     initRCards();
     animate();
-    s.dealInterval = window.setInterval(() => { if (!s.rPaused && s.rCards.length < 12) dealNew(); }, 12000);
+    s.dealInterval = window.setInterval(() => { if (!s.rPaused) dealNew(); }, 12000);
 
     return () => {
       cancelAnimationFrame(s.animId);
       clearInterval(s.dealInterval);
+      s.animIntervals?.forEach(clearInterval);
       window.removeEventListener('resize', resize);
       canvas.removeEventListener('mousedown', onMouseDown);
       canvas.removeEventListener('mousemove', onMouseMove);

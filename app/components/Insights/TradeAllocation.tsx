@@ -1,18 +1,62 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect, useLayoutEffect, useMemo } from 'react';
+import { PieChart, Pie, Cell } from 'recharts';
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
 
 export default function TradeAllocation({ dk }: { dk: boolean }) {
   const [chartReady, setChartReady] = useState(false);
-  useEffect(() => setChartReady(false), []);
-  useLayoutEffect(() => { setChartReady(true); }, []);
-  const data = [
-    { name: 'BANANAS31', value: 31, color: '#ef4444', pct: '4.7%' },
-    { name: 'ZRO', value: 22, color: '#f97316', pct: '3.4%' },
-    { name: 'BTC', value: 33, color: '#eab308', pct: '5.1%' },
-    { name: 'DEXE', value: 6, color: '#22c55e', pct: '0.9%' },
-    { name: 'FET', value: 8, color: '#0ea5e9', pct: '1.2%' },
-    { name: 'Others (172)', value: 553, color: '#64748b', pct: '84.7%' }
-  ];
+  useEffect(() => { setChartReady(true); }, []);
+
+  const { completedTrades } = useDashboardTrades();
+
+  const data = useMemo(() => {
+    const counts: Record<string, number> = {};
+    completedTrades.forEach(t => {
+      const sym = t.entryOrder?.symbol || 'UNKNOWN';
+      counts[sym] = (counts[sym] || 0) + 1;
+    });
+
+    const sorted = Object.entries(counts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    const total = completedTrades.length || 1;
+    
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#0ea5e9'];
+    const top = sorted.slice(0, 5).map((s, i) => ({
+      name: s.name,
+      value: s.value,
+      color: colors[i],
+      pct: ((s.value / total) * 100).toFixed(1) + '%'
+    }));
+
+    if (sorted.length > 5) {
+      const othersValue = sorted.slice(5).reduce((sum, s) => sum + s.value, 0);
+      top.push({
+        name: `Others (${sorted.length - 5})`,
+        value: othersValue,
+        color: '#64748b',
+        pct: ((othersValue / total) * 100).toFixed(1) + '%'
+      });
+    }
+
+    return top.length > 0 ? top : [{ name: 'No Data', value: 1, color: '#64748b', pct: '100%' }];
+  }, [completedTrades]);
+
+  const uniqueSymbols = useMemo(() => new Set(completedTrades.map(t => t.entryOrder?.symbol)).size, [completedTrades]);
+  const totalTrades = completedTrades.length;
+  
+  const top5Pct = useMemo(() => {
+    if (totalTrades === 0) return 0;
+    const top5sum = data.filter(d => !d.name.startsWith('Others')).reduce((s, d) => s + d.value, 0);
+    return Math.round((top5sum / totalTrades) * 100);
+  }, [data, totalTrades]);
+
+  const stats = useMemo(() => {
+    const wins = completedTrades.filter(t => t.pnl.realized >= 0);
+    const losses = completedTrades.filter(t => t.pnl.realized < 0);
+    const winRate = totalTrades > 0 ? (wins.length / totalTrades * 100).toFixed(1) : '0.0';
+    const totalWinPnl = wins.reduce((s, t) => s + t.pnl.realized, 0);
+    const totalLossPnl = Math.abs(losses.reduce((s, t) => s + t.pnl.realized, 0)) || 1;
+    const profitFactor = (totalWinPnl / totalLossPnl).toFixed(2);
+    return { winRate, profitFactor };
+  }, [completedTrades, totalTrades]);
 
   return (
     <div style={{
@@ -28,7 +72,7 @@ export default function TradeAllocation({ dk }: { dk: boolean }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: dk ? '#fff' : '#111', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Trade Allocation</div>
-          <div style={{ fontSize: 11, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)', marginTop: 4 }}>177 symbols traded · Top 5 represent 15% of all trades</div>
+          <div style={{ fontSize: 11, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)', marginTop: 4 }}>{uniqueSymbols} symbols traded · Top 5 represent {top5Pct}% of all trades</div>
         </div>
         <div style={{ display: 'flex', background: dk ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 6, padding: 2 }}>
           <div style={{ padding: '4px 12px', fontSize: 11, fontWeight: 600, background: dk ? 'rgba(52, 211, 153, 0.15)' : 'rgba(52, 211, 153, 0.15)', color: '#34d399', borderRadius: 4, cursor: 'pointer' }}>Symbol</div>
@@ -40,8 +84,8 @@ export default function TradeAllocation({ dk }: { dk: boolean }) {
       <div style={{ display: 'flex', flex: 1, gap: 16, alignItems: 'center' }}>
         {/* Donut Chart */}
         <div style={{ width: 130, height: 130, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {chartReady && <ResponsiveContainer width="100%" height={130} minWidth={1} minHeight={1}>
-            <PieChart>
+          {chartReady && (
+            <PieChart width={130} height={130}>
               <Pie
                 data={data}
                 cx="50%"
@@ -57,11 +101,11 @@ export default function TradeAllocation({ dk }: { dk: boolean }) {
                 ))}
               </Pie>
             </PieChart>
-          </ResponsiveContainer>}
+          )}
           {/* Inner Text */}
           <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: dk ? '#fff' : '#111' }}>ALL</div>
-            <div style={{ fontSize: 10, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)' }}>653 trades</div>
+            <div style={{ fontSize: 10, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)' }}>{totalTrades} trades</div>
           </div>
         </div>
 
@@ -87,15 +131,15 @@ export default function TradeAllocation({ dk }: { dk: boolean }) {
       <div style={{ display: 'flex', marginTop: 'auto', paddingTop: 16, borderTop: `1px solid ${dk ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`, gap: 40 }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 600, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)', letterSpacing: '0.05em' }}>WIN RATE</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#34d399', marginTop: 4 }}>26.2%</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#34d399', marginTop: 4 }}>{stats.winRate}%</div>
         </div>
         <div>
           <div style={{ fontSize: 10, fontWeight: 600, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)', letterSpacing: '0.05em' }}>PROFIT FACTOR</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: dk ? '#fff' : '#111', marginTop: 4 }}>0.05</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: dk ? '#fff' : '#111', marginTop: 4 }}>{stats.profitFactor}</div>
         </div>
         <div>
           <div style={{ fontSize: 10, fontWeight: 600, color: dk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)', letterSpacing: '0.05em' }}>SYMBOLS</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: dk ? '#fff' : '#111', marginTop: 4 }}>177</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: dk ? '#fff' : '#111', marginTop: 4 }}>{uniqueSymbols}</div>
         </div>
       </div>
     </div>

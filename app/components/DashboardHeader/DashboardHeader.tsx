@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { LayoutDashboard, Briefcase, Bell, Wifi, ChevronDown, Sun, Moon, Zap } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Bell, Wifi, ChevronDown, Sun, Moon, Zap, LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '../../context/ThemeContext';
+import { logoutUser } from '../../lib/authApi';
+import { clearToken } from '../../lib/auth';
 import './DashboardHeader.css';
 
 const NAV_ITEMS = [
@@ -29,7 +31,33 @@ export default function DashboardHeader() {
   }, [getActiveFromPath]);
   const [time, setTime] = useState('');
   const [ping, setPing] = useState(12);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
+
+  /* Close dropdown on outside click */
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [menuOpen]);
+
+  const handleLogout = useCallback(async () => {
+    setLoggingOut(true);
+    try {
+      await logoutUser();
+    } catch {
+      // token may already be expired — proceed anyway
+    } finally {
+      clearToken();
+      router.push('/auth/login');
+    }
+  }, [router]);
 
   /* Sliding indicator state */
   const navRef = useRef<HTMLElement>(null);
@@ -78,29 +106,8 @@ export default function DashboardHeader() {
       <div className="dh-left">
         {/* Logo */}
         <div className="dh-logo">
-          <svg width="28" height="28" viewBox="0 0 100 100" className="dh-logo-svg">
-            <line x1="50" y1="22" x2="50" y2="8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <circle cx="50" cy="5" r="4" fill="currentColor" />
-            <rect x="22" y="24" width="56" height="42" rx="12" ry="12" fill="none" stroke="currentColor" strokeWidth="5" />
-            <circle cx="38" cy="46" r="5" fill="currentColor" />
-            <circle cx="62" cy="46" r="5" fill="currentColor" />
-            <line x1="38" y1="56" x2="62" y2="56" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            <rect x="12" y="36" width="8" height="16" rx="3" fill="currentColor" opacity="0.7" />
-            <rect x="80" y="36" width="8" height="16" rx="3" fill="currentColor" opacity="0.7" />
-            <line x1="38" y1="66" x2="38" y2="82" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <line x1="62" y1="66" x2="62" y2="82" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <line x1="32" y1="82" x2="44" y2="82" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <line x1="56" y1="82" x2="68" y2="82" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-          </svg>
-          <span className="dh-logo-name">
-            BYT
-            <span className="dh-logo-e">
-              <span className="dh-e-line" style={{ background: '#ff3b3b' }} />
-              <span className="dh-e-line" style={{ background: '#3bff6f' }} />
-              <span className="dh-e-line" style={{ background: '#3b8bff' }} />
-            </span>
-            BOOM
-          </span>
+          <img src="/robot-only.png" alt="ByteBoom" width={28} height={28} style={{ objectFit: 'contain' }} />
+          <span className="dh-logo-name">BYTEBOOM</span>
         </div>
 
         {/* Nav with sliding indicator */}
@@ -167,16 +174,38 @@ export default function DashboardHeader() {
         <div className="dh-divider" />
 
         {/* Profile section */}
-        <div className="dh-profile">
-          <div className="dh-avatar">
-            <span>S</span>
-            <span className="dh-avatar-status" />
+        <div className="dh-profile-wrapper" ref={profileRef}>
+          <div
+            className={`dh-profile${menuOpen ? ' open' : ''}`}
+            onClick={() => setMenuOpen(o => !o)}
+            role="button"
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+          >
+            <div className="dh-avatar">
+              <span>S</span>
+              <span className="dh-avatar-status" />
+            </div>
+            <div className="dh-profile-info">
+              <span className="dh-profile-name">Sibte N.</span>
+              <span className="dh-profile-role">Pro Trader</span>
+            </div>
+            <ChevronDown size={12} className={`dh-profile-chevron${menuOpen ? ' rotated' : ''}`} />
           </div>
-          <div className="dh-profile-info">
-            <span className="dh-profile-name">Sibte N.</span>
-            <span className="dh-profile-role">Pro Trader</span>
-          </div>
-          <ChevronDown size={12} className="dh-profile-chevron" />
+
+          {menuOpen && (
+            <div className="dh-profile-menu" role="menu">
+              <button
+                className="dh-menu-item dh-menu-item--logout"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                role="menuitem"
+              >
+                <LogOut size={13} />
+                <span>{loggingOut ? 'Logging out…' : 'Logout'}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

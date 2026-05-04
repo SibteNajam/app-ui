@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
 import './TradeHistoryCards.css';
 
 /* ══════════════════════════════════════════════════════
@@ -10,21 +11,6 @@ import './TradeHistoryCards.css';
 interface TradeData {
   sym: string; pair: string; qty: string; buyAt: number; sellAt: number; vol: string; pnl: number; roi: number;
 }
-
-const POOL: TradeData[] = [
-  { sym: 'BTC', pair: 'BTC/USDT SPOT', qty: '0.048 BTC', buyAt: 62400, sellAt: 64820, vol: '$3,110', pnl: 116.16, roi: 3.88 },
-  { sym: 'ETH', pair: 'ETH/USDT SPOT', qty: '1.40 ETH', buyAt: 3050, sellAt: 3191, vol: '$4,467', pnl: 197.40, roi: 4.62 },
-  { sym: 'SOL', pair: 'SOL/USDT SPOT', qty: '12.5 SOL', buyAt: 168.50, sellAt: 161.0, vol: '$2,012', pnl: -93.75, roi: -4.45 },
-  { sym: 'BNB', pair: 'BNB/USDT SPOT', qty: '3.20 BNB', buyAt: 582.00, sellAt: 594.0, vol: '$1,900', pnl: 38.40, roi: 2.06 },
-  { sym: 'AVAX', pair: 'AVAX/USDT SPOT', qty: '18.0 AVAX', buyAt: 40.20, sellAt: 38.40, vol: '$691', pnl: -32.40, roi: -4.48 },
-  { sym: 'ARB', pair: 'ARB/USDT SPOT', qty: '250 ARB', buyAt: 1.04, sellAt: 1.12, vol: '$280', pnl: 20.00, roi: 7.69 },
-  { sym: 'LINK', pair: 'LINK/USDT SPOT', qty: '30.0 LINK', buyAt: 14.40, sellAt: 14.82, vol: '$444', pnl: 12.60, roi: 2.92 },
-  { sym: 'INJ', pair: 'INJ/USDT SPOT', qty: '4.50 INJ', buyAt: 31.70, sellAt: 28.60, vol: '$128', pnl: -13.95, roi: -9.78 },
-  { sym: 'TIA', pair: 'TIA/USDT SPOT', qty: '55.0 TIA', buyAt: 8.80, sellAt: 9.14, vol: '$502', pnl: 18.70, roi: 3.86 },
-  { sym: 'WIF', pair: 'WIF/USDT SPOT', qty: '40.0 WIF', buyAt: 3.02, sellAt: 2.87, vol: '$114', pnl: -6.00, roi: -4.97 },
-  { sym: 'JUP', pair: 'JUP/USDT SPOT', qty: '100 JUP', buyAt: 0.88, sellAt: 0.94, vol: '$94', pnl: 6.00, roi: 6.82 },
-  { sym: 'SEI', pair: 'SEI/USDT SPOT', qty: '120 SEI', buyAt: 0.65, sellAt: 0.61, vol: '$73', pnl: -4.80, roi: -6.15 },
-];
 
 function getCoinColors(sym: string) {
   return ({
@@ -151,54 +137,95 @@ export default function TradeHistoryCards() {
   const trackRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const dealIdxRef = useRef(7);
+  const fetchedLogos = useRef<Set<string>>(new Set());
+
+  const { completedTrades } = useDashboardTrades();
+
+  const POOL = useMemo<TradeData[]>(() =>
+    completedTrades.map(trade => ({
+      sym: trade.entryOrder.symbol?.replace('USDT', '') ?? 'N/A',
+      pair: `${trade.entryOrder.symbol} SPOT`,
+      qty: `${trade.entryOrder.executedQty} ${trade.entryOrder.symbol?.replace('USDT', '')}`,
+      buyAt: trade.entryOrder.price,
+      sellAt: trade.exitOrders[0]?.price ?? 0,
+      vol: `$${trade.pnl.entryCost.toFixed(2)}`,
+      pnl: trade.pnl.realized,
+      roi: trade.pnl.realizedPercent,
+    })),
+  [completedTrades]);
+
+  // Ref lets useEffects always read latest POOL without re-running
+  const poolRef = useRef<TradeData[]>(POOL);
+  useEffect(() => { poolRef.current = POOL; }, [POOL]);
 
   /* Logo fetching */
   const fetchLogo = useCallback(async (sym: string) => {
     const name = sym.toLowerCase();
-    const unsupported = ['sei', 'arb', 'tia', 'inj', 'sui', 'wif', 'jup'];
-    if (unsupported.includes(name)) return null;
 
-    const url = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/${name}.png`;
-    try { const r = await fetch(url, { mode: 'cors' }); if (r.ok) return url; } catch { /* next */ }
+    // 1) Try logo.dev Crypto API (Highest coverage)
+    try {
+      const LOGO_DEV_PUBLIC_KEY = process.env.NEXT_PUBLIC_LOGO_DEV_KEY || 'pk_QIbxxJdHRE2Wx8DT5U_5yw';
+      const logoDevUrl = `https://img.logo.dev/crypto/${name}?token=${LOGO_DEV_PUBLIC_KEY}&fallback=404`;
+      const r0 = await fetch(logoDevUrl, { mode: 'cors' });
+      if (r0.ok) return logoDevUrl;
+    } catch {}
+
+    // 2) Try CoinGecko search API to get a reliable asset image
+    try {
+      const q = encodeURIComponent(sym);
+      const r = await fetch(`https://api.coingecko.com/api/v3/search?query=${q}`);
+      if (r.ok) {
+        const j = await r.json();
+        const coins = Array.isArray(j.coins) ? j.coins : [];
+        // Prefer exact symbol match (case-insensitive), otherwise take first result
+        const match = coins.find((c: any) => (c.symbol || '').toLowerCase() === name) || coins[0];
+        if (match && (match.large || match.thumb)) {
+          const img = match.large ?? match.thumb;
+          try { const rr = await fetch(img, { mode: 'cors' }); if (rr.ok) return img; } catch { /* fallthrough */ }
+        }
+      }
+    } catch (e) {
+      // ignore and fallthrough to other CDNs
+    }
+
+    // 3) Fallback to cryptologos.cc (commonly used elsewhere in the app)
+    try {
+      const cryptoUrl = `https://cryptologos.cc/logos/${name}-logo.png`;
+      const r2 = await fetch(cryptoUrl, { mode: 'cors' });
+      if (r2.ok) return cryptoUrl;
+    } catch {}
+
+    // 4) Final fallback: the small cryptocurrency-icons pack (limited coverage)
+    try {
+      const cdn = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/128/color/${name}.png`;
+      const r3 = await fetch(cdn, { mode: 'cors' });
+      if (r3.ok) return cdn;
+    } catch {}
+
     return null;
   }, []);
 
-  /* Init cards */
+  /* Init: set mounted state and clear loading skeleton */
   useEffect(() => {
     setIsMounted(true);
-    const initial = POOL.slice(0, 7);
-    setCards(initial);
-    initial.forEach(d => {
-      fetchLogo(d.sym).then(url => {
-        if (url) setLogos(prev => ({ ...prev, [d.sym]: url }));
-      });
-    });
-
     const loadT = setTimeout(() => setLoading(false), 4000);
     return () => clearTimeout(loadT);
-  }, [fetchLogo]);
+  }, []);
 
-  /* Auto deal new cards */
+  /* Sync all cards from pool — loads all at once, handles API response latency */
   useEffect(() => {
-    const interval = setInterval(() => {
-      const data = POOL[dealIdxRef.current % POOL.length];
-      dealIdxRef.current++;
-
-      setCards(prev => [...prev, data]);
-      fetchLogo(data.sym).then(url => {
-        if (url) setLogos(prev => ({ ...prev, [data.sym]: url }));
-      });
-
-      setToast(`✦ ${data.sym} spot trade closed`);
-      setTimeout(() => setToast(''), 2400);
-
-      setTimeout(() => {
-        if (wrapRef.current) wrapRef.current.scrollTo({ left: wrapRef.current.scrollWidth, behavior: 'smooth' });
-      }, 120);
-    }, 14000);
-
-    return () => clearInterval(interval);
-  }, [fetchLogo]);
+    if (POOL.length === 0) return;
+    setLoading(false);
+    setCards(POOL);
+    POOL.forEach(d => {
+      if (!fetchedLogos.current.has(d.sym)) {
+        fetchedLogos.current.add(d.sym);
+        fetchLogo(d.sym).then(url => {
+          if (url) setLogos(prev => ({ ...prev, [d.sym]: url }));
+        });
+      }
+    });
+  }, [POOL, fetchLogo]);
 
   if (!isMounted || loading) {
     const isLight = theme === 'light';
@@ -251,7 +278,7 @@ export default function TradeHistoryCards() {
       <div className="track-wrap" ref={wrapRef}>
         <div className="track" ref={trackRef}>
           {cards.map((d, i) => (
-            <FlipCard key={`${d.sym}-${i}`} data={d} logoUrl={logos[d.sym]} entering={i >= 7} />
+            <FlipCard key={`${d.sym}-${i}`} data={d} logoUrl={logos[d.sym]} entering={false} />
           ))}
         </div>
       </div>

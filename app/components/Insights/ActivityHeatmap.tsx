@@ -1,26 +1,63 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-
-// Helper to generate a year of data
-const generateHeatmapData = () => {
-  const data = [];
-  for (let w = 0; w < 52; w++) {
-    const week = [];
-    for (let d = 0; d < 7; d++) {
-      // Randomly assign a value between 0 and 4 with some clustering
-      const val = Math.random() > 0.75 ? Math.floor(Math.random() * 4) + 1 : 0;
-      week.push(val);
-    }
-    data.push(week);
-  }
-  return data;
-};
+import { useDashboardTrades } from '../../hooks/useDashboardTrades';
 
 export default function ActivityHeatmap({ dk }: { dk: boolean }) {
-  const data = useMemo(() => generateHeatmapData(), []);
+  const { completedTrades } = useDashboardTrades();
+  
+  const { data, totalActivities } = useMemo(() => {
+    // initialize empty 52x7 array
+    const grid = Array.from({ length: 52 }, () => Array(7).fill(0));
+    
+    if (!completedTrades || completedTrades.length === 0) {
+      return { data: grid, totalActivities: 0 };
+    }
+
+    // count trades by day "YYYY-M-D"
+    const dayCounts: Record<string, number> = {};
+    completedTrades.forEach(t => {
+      const d = new Date(t.entryOrder?.filledAt || Date.now());
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      dayCounts[key] = (dayCounts[key] || 0) + 1;
+    });
+
+    const maxCount = Math.max(1, ...Object.values(dayCounts));
+    const now = new Date();
+    
+    // Fill the past 364 days (52 weeks * 7 days)
+    for (let i = 0; i < 364; i++) {
+      const d = new Date(now.getTime() - i * 86400000);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const count = dayCounts[key] || 0;
+      
+      let level = 0;
+      if (count > 0) {
+        level = Math.ceil((count / maxCount) * 4); // maps to 1-4
+      }
+
+      // Calculate grid coordinates: 0 is oldest day, 363 is today
+      const flatIndex = 363 - i; 
+      const week = Math.floor(flatIndex / 7);
+      const day = flatIndex % 7;
+      
+      if (week >= 0 && week < 52) {
+        grid[week][day] = level;
+      }
+    }
+    return { data: grid, totalActivities: completedTrades.length };
+  }, [completedTrades]);
+
   const [activeYear, setActiveYear] = useState('2026');
 
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = useMemo(() => {
+    const arr = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      arr.push(d.toLocaleDateString('en-US', { month: 'short' }));
+    }
+    return arr;
+  }, []);
   const years = ['2026', '2025', '2024'];
   
   // Theme-based colors (Blue/Emerald theme to fit current UI)
@@ -44,7 +81,7 @@ export default function ActivityHeatmap({ dk }: { dk: boolean }) {
       height: '100%',
     }}>
       <div style={{ marginBottom: 24, textAlign: 'center', fontSize: 18, fontWeight: 600, color: dk ? '#fff' : '#111', fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.01em' }}>
-        2,431 Market Activities this year
+        {totalActivities} Market Activities (Past Year)
       </div>
 
       <div style={{ display: 'flex', gap: 32, width: '100%', alignItems: 'stretch' }}>

@@ -9,7 +9,9 @@
 }
 
 .csa-card {
-  background: #0f172a;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 20px;
@@ -270,4 +272,168 @@
 
 .csa-convert-btn:hover .csa-btn-icon {
   transform: translateX(4px);
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL & TOAST STYLING
+   ══════════════════════════════════════════════════════════ */
+
+.csa-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 100;
+  animation: slideInUp 0.4s ease-out forwards;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.csa-toast.success {
+  background: #059669;
+  border: 1px solid #10b981;
+}
+
+.csa-toast.error {
+  background: #b91c1c;
+  border: 1px solid #ef4444;
+}
+
+.csa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 16, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.csa-modal {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.csa-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.csa-modal-close:hover {
+  color: #f8fafc;
+}
+
+.csa-modal-icon {
+  background: rgba(239, 68, 68, 0.1);
+  padding: 16px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.csa-modal h3 {
+  color: #f8fafc;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.csa-modal p {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.csa-modal p strong {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.csa-modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.csa-btn-cancel, .csa-btn-confirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.csa-btn-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.csa-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.csa-btn-confirm {
+  background: #ef4444;
+  border: 1px solid #f87171;
+  color: #ffffff;
+}
+
+.csa-btn-confirm:hover {
+  background: #dc2626;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+.csa-convert-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: transparent;
+  pointer-events: none;
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
